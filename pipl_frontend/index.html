@@ -1,0 +1,1710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ПИПЛ · Specialty coffee shop — Программа лояльности</title>
+    <meta name="description" content="ПИПЛ · specialty coffee shop на Сахалине. Свежий specialty-кофе и программа лояльности с кофейными зёрнами. Каждая 6-я чашка — в подарок.">
+    <meta name="theme-color" content="#95B8D9">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%2395B8D9'/%3E%3Ctext x='50' y='68' font-size='44' text-anchor='middle'%3E%E2%98%95%3C/text%3E%3C/svg%3E">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Onest:wght@300;400;500;600;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>/* ================= PIPL COFFEE · MODERN MINIMAL =================
+        Нежно-голубой фон #95B8D9 (Pantone 644 C), белые элементы,
+        тёмно-серый акцент #243029 (Pantone 447 C), шрифт Onest (Black).
+        Полупрозрачные белые кофейные зёрна парят на фоне + параллакс. */
+
+        @font-face {
+            font-family: 'Onest';
+            src: url('res/fonts/Onest.ttf') format('truetype');
+            font-weight: 100 900;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            --bg: #95B8D9;                   /* Pantone 644 C — нежный голубой */
+            --bg-2: #A9C9E1;
+            --bg-deep: #84ACCD;
+            --ink: #243029;                  /* Pantone 447 C — тёмно-серый акцент */
+            --ink-soft: rgba(36, 48, 41, 0.66);
+            --ink-faint: rgba(36, 48, 41, 0.42);
+            --keyword-white: #FFFFFF;
+            --white-soft: rgba(255, 255, 255, 0.78);
+            --white-faint: rgba(255, 255, 255, 0.55);
+            --brand: #95B8D9;
+            --brand-2: #C2D8EA;
+            --brand-deep: #5E8FBD;
+            --brand-ink: #3F6B99;
+            --success: #3E7A52;
+            --success-bg: rgba(62, 122, 82, 0.12);
+            --error: #B4553A;
+            --error-bg: rgba(180, 85, 58, 0.12);
+            --card: #FFFFFF;
+            --card-2: #F5F9FC;
+            --glass: rgba(255, 255, 255, 0.86);
+            --glass-soft: rgba(255, 255, 255, 0.7);
+            --wash: #EEF4FA;
+            --wash-2: #E2EBF3;
+            --line: rgba(36, 48, 41, 0.14);
+            --line-soft: rgba(36, 48, 41, 0.09);
+            --radius: 26px;
+            --radius-sm: 16px;
+            --radius-xs: 10px;
+            --shadow: 0 30px 70px -28px rgba(31, 58, 84, 0.35);
+            --shadow-soft: 0 18px 46px -20px rgba(31, 58, 84, 0.25);
+            --glow: 0 0 0 1px rgba(255, 255, 255, 0.55), 0 18px 54px -18px rgba(255, 255, 255, 0.4);
+            --ease: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Onest', 'Inter', -apple-system, sans-serif;
+            color: var(--keyword-white);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            background:
+                radial-gradient(900px 460px at 88% -10%, rgba(255, 255, 255, 0.28), transparent 62%),
+                radial-gradient(760px 420px at -10% 32%, rgba(255, 255, 255, 0.16), transparent 60%),
+                linear-gradient(180deg, #9DBFD8 0%, #95B8D9 55%, #8FB1D1 100%);
+            background-attachment: fixed;
+        }
+
+        ::selection { background: rgba(255, 255, 255, 0.55); color: var(--ink); }
+
+        ::-webkit-scrollbar { width: 10px; height: 10px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.5); border-radius: 100px; border: 2px solid var(--bg); }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.75); }
+
+        .hidden { display: none !important; }
+
+        /* ============ ПАРЯЩИЕ КОФЕЙНЫЕ ЗЁРНА ============ */
+        .beans-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; opacity: 0.12; }
+        .bean {
+            position: absolute; display: block;
+            background: #FFFFFF;
+            border-radius: 58% 58% 58% 58% / 74% 74% 38% 38%;
+            box-shadow: inset -6px -8px 12px rgba(36, 48, 41, 0.16), 0 10px 22px -10px rgba(36, 48, 41, 0.35);
+            animation: beanBob var(--d, 14s) ease-in-out infinite;
+            animation-delay: var(--dl, 0s);
+            will-change: transform;
+        }
+        .bean::after {
+            content: ''; position: absolute; left: 50%; top: 12%; bottom: 12%;
+            width: 16%; margin-left: -8%; transform: rotate(-16deg);
+            background: rgba(36, 48, 41, 0.3); border-radius: 50%;
+        }
+        .bean::before {
+            content: ''; position: absolute; left: 22%; top: 8%;
+            width: 34%; height: 22%; border-radius: 50%;
+            background: linear-gradient(105deg, rgba(255,255,255,0.95), rgba(255,255,255,0.1));
+            filter: blur(1px);
+            animation: beanGloss var(--d, 14s) ease-in-out infinite;
+            animation-delay: var(--dl, 0s);
+        }
+        @keyframes beanBob {
+            0%, 100% { transform: translateY(0) rotate(-38deg) scale(0.94); }
+            25%      { transform: translateY(-22px) rotate(32deg) scale(1.12); }
+            50%      { transform: translateY(-6px) rotate(-14deg) scale(1.02); }
+            75%      { transform: translateY(-16px) rotate(24deg) scale(1.08); }
+        }
+        @keyframes beanGloss {
+            0%, 45%  { opacity: 0.15; transform: translateX(0) scaleX(1); }
+            60%      { opacity: 0.95; transform: translateX(2px) scaleX(1.25); }
+            90%, 100%{ opacity: 0.25; transform: translateX(0) scaleX(0.9); }
+        }
+
+        /* ============ КОНТЕНТ ============ */
+        .site { position: relative; z-index: 3; max-width: 1360px; margin: 0 auto; padding: 1.6rem 2.5rem 4rem; }
+
+        /* ============ ХЕДЕР ============ */
+        .header {
+            display: flex; justify-content: space-between; align-items: center; gap: 1.5rem;
+            padding: 0.7rem 1.6rem 0.7rem 1.2rem; margin-bottom: 4rem;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 12px 38px -20px rgba(31, 58, 84, 0.28);
+            animation: rise 0.8s var(--ease) both;
+            transition: background 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+        }
+        .header.scrolled { background: rgba(255, 255, 255, 0.22); border-color: rgba(255, 255, 255, 0.55); box-shadow: 0 18px 50px -22px rgba(31, 58, 84, 0.35); }
+        .logo { display: flex; align-items: center; cursor: pointer; user-select: none; }
+        .logo-text {
+            display: inline-flex; align-items: center; gap: 9px;
+            color: #FFFFFF; font-weight: 900; font-size: 1.5rem; letter-spacing: 0.05em;
+        }
+        .logo-text.on-light { color: var(--ink); }
+        .logo-img, .logo img.logo-img { height: auto; max-height: 60px; width: auto; object-fit: contain; transition: transform 0.5s var(--ease-spring); filter: drop-shadow(0 6px 18px rgba(31, 58, 84, 0.3)); }
+        .logo:hover .logo-img { transform: scale(1.04) rotate(-1deg); }
+
+        .nav-right { display: flex; align-items: center; gap: 1.3rem; }
+        .nav { display: flex; gap: 2rem; font-weight: 700; font-size: 0.76rem; letter-spacing: 0.1em; text-transform: uppercase; align-items: center; }
+        .nav span { cursor: pointer; color: var(--ink-soft); position: relative; transition: color 0.3s; padding: 4px 0; display: inline-flex; align-items: center; gap: 7px; }
+        .nav span::after { content: ''; position: absolute; left: 0; bottom: -3px; width: 0; height: 2px; border-radius: 2px; background: var(--ink); transition: width 0.35s var(--ease); }
+        .nav span:hover { color: var(--ink); }
+        .nav span:hover::after { width: 100%; }
+
+        /* ============ КНОПКИ ============ */
+        .btn {
+            border: 1px solid rgba(255, 255, 255, 0.7); font-weight: 700; padding: 0.85rem 1.8rem; font-size: 0.76rem;
+            background: rgba(255, 255, 255, 0.12); color: #FFFFFF; border-radius: 100px;
+            display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+            letter-spacing: 0.08em; text-transform: uppercase; position: relative; overflow: hidden;
+            transition: transform 0.35s var(--ease-spring), box-shadow 0.35s, border-color 0.35s, background 0.35s, color 0.35s;
+            -webkit-tap-highlight-color: transparent;
+            text-decoration: none; cursor: pointer;
+        }
+        .btn::before {
+            content: ''; position: absolute; inset: 0; z-index: 0;
+            background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.45) 50%, transparent 68%);
+            transform: translateX(-130%); transition: transform 0.7s var(--ease);
+        }
+        .btn:hover::before { transform: translateX(130%); }
+        .btn > * { position: relative; z-index: 1; }
+        .btn:hover { transform: translateY(-3px); background: #243029; border-color: #243029; color: #FFFFFF; box-shadow: 0 20px 50px -16px rgba(36, 48, 41, 0.45); }
+        .btn-primary { background: #FFFFFF; color: #243029; border-color: #FFFFFF; font-weight: 800; box-shadow: 0 14px 34px -14px rgba(36, 48, 41, 0.3); }
+        .btn-primary:hover { background: #243029; color: #FFFFFF; border-color: #243029; }
+        .btn-ghost { background: transparent; }
+        .btn-ghost:hover { background: #243029; border-color: #243029; color: #FFFFFF; }
+        .btn-blue {
+            background: linear-gradient(135deg, var(--brand-deep), #3F6B99); color: #fff; border-color: transparent; font-weight: 800;
+            box-shadow: 0 12px 30px -12px rgba(71, 113, 157, 0.5);
+        }
+        .btn-blue:hover { background: #243029; border-color: #243029; }
+        .btn-green {
+            background: linear-gradient(135deg, #7FB58F, #5C8A6E); color: #243029; border-color: transparent; font-weight: 800;
+            box-shadow: 0 12px 30px -12px rgba(92, 138, 110, 0.45);
+        }
+        .btn-green:hover { background: #243029; color: #FFFFFF; border-color: #243029; }
+        .btn-danger {
+            background: linear-gradient(135deg, #E08A6C, #C46545); color: #fff; border-color: transparent; font-weight: 800;
+            box-shadow: 0 12px 30px -12px rgba(196, 101, 69, 0.45);
+        }
+        .btn-danger:hover { background: #243029; border-color: #243029; }
+        .btn-full { width: 100%; padding: 1rem; }
+        .btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none !important; }
+        .nav-btn { position: relative; z-index: 1; }
+        a:focus-visible, button:focus-visible, .nav span:focus-visible { outline: 3px solid rgba(255, 255, 255, 0.7); outline-offset: 3px; border-radius: 8px; }
+
+        /* ============ БЕЙДЖ ============ */
+        .badge-pill {
+            display: inline-flex; align-items: center; gap: 10px; padding: 0.55rem 1.2rem 0.55rem 1rem;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.45); border-radius: 100px;
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--ink);
+            box-shadow: var(--shadow-soft); margin-bottom: 3rem; backdrop-filter: blur(8px);
+            animation: rise 0.8s var(--ease) 0.06s both, frameBreath 5.5s ease-in-out 0.8s infinite;
+        }
+        .badge-pill .dot-live { width: 8px; height: 8px; border-radius: 50%; background: var(--ink); box-shadow: 0 0 0 0 rgba(36, 48, 41, 0.5); animation: ping 2s infinite; }
+        .badge-pill .divider { width: 1px; height: 14px; background: rgba(36, 48, 41, 0.35); }
+
+        @keyframes ping { 0% { box-shadow: 0 0 0 0 rgba(36,48,41,0.45); } 70% { box-shadow: 0 0 0 9px rgba(36,48,41,0); } 100% { box-shadow: 0 0 0 0 rgba(36,48,41,0); } }
+
+        /* ============ АНИМАЦИИ РАМОК И ТЕКСТА ============ */
+        @keyframes frameBreath {
+            0%, 100% { border-color: rgba(255, 255, 255, 0.42); box-shadow: var(--shadow-soft), 0 0 0 0 rgba(255, 255, 255, 0.0); }
+            50% { border-color: rgba(255, 255, 255, 0.85); box-shadow: var(--shadow-soft), 0 0 44px -4px rgba(255, 255, 255, 0.5); }
+        }
+        @keyframes softFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        @keyframes textWave {
+            0%, 100% { opacity: 1; text-shadow: 0 0 0 rgba(36, 48, 41, 0); }
+            50% { opacity: 0.96; text-shadow: 0 4px 26px rgba(36, 48, 41, 0.28); }
+        }
+        .float-slow { animation: softFloat 7s ease-in-out 1.2s infinite; }
+        .float-slower { animation: softFloat 9s ease-in-out 2.4s infinite; }
+        .text-wave { animation: textWave 4.5s ease-in-out infinite; }
+
+        /* ============ ГЕРО ============ */
+        .hero { display: grid; grid-template-columns: 1.08fr 0.92fr; gap: 4rem; align-items: center; padding: 1rem 0 3rem; }
+        .hero-tag {
+            display: inline-flex; align-items: center; gap: 8px; margin-bottom: 1.4rem;
+            font-size: 0.6rem; font-weight: 800; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-soft);
+            background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.5); padding: 0.5rem 1.05rem; border-radius: 100px;
+            backdrop-filter: blur(10px);
+            animation: rise 0.8s var(--ease) 0.14s both, frameBreath 6s ease-in-out 1s infinite;
+        }
+        .hero-tag i { color: var(--ink); }
+        .hero h1 { font-size: clamp(3.4rem, 7vw, 6rem); font-weight: 900; letter-spacing: -0.05em; line-height: 0.95; margin-bottom: 1.5rem; color: var(--ink) !important; text-wrap: balance; animation: rise 0.9s var(--ease) 0.22s both, softFloat 8s ease-in-out 2s infinite; }
+        .hero h1 .sep { display: inline-block; color: rgba(36, 48, 41, 0.4); transform: translateY(-2px); }
+        .grad-text {
+            background: linear-gradient(118deg, #243029 0%, #3E5A4E 45%, #5E8FBD 100%);
+            background-size: 220% auto; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+            animation: shimmer 6s linear infinite;
+        }
+        @keyframes shimmer { to { background-position: -220% center; } }
+        .hero p { font-size: 1.08rem; line-height: 1.75; color: rgba(36, 48, 41, 0.78); max-width: 92%; margin-bottom: 2.2rem; font-weight: 500; animation: rise 0.9s var(--ease) 0.34s both; text-wrap: balance; }
+        .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; animation: rise 0.9s var(--ease) 0.46s both; }
+        .hero-right { animation: rise 1s var(--ease) 0.55s both; }
+
+        @keyframes rise { from { opacity: 0; transform: translateY(34px); } to { opacity: 1; transform: none; } }
+
+        /* Бенто-плитки ПИПЛ */
+        .hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-block {
+            aspect-ratio: 1; border-radius: var(--radius); position: relative; overflow: hidden;
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.06));
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; padding: 1.4rem;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.5s var(--ease-spring), border-color 0.4s, box-shadow 0.4s;
+            animation: frameBreath 6s ease-in-out infinite;
+            animation-delay: calc(var(--mx, 20%) * 0.1s);
+        }
+        .grid-block:nth-child(odd) { animation-delay: 0.6s; }
+        .grid-block:nth-child(even) { animation-delay: 1.8s; }
+        .grid-block::before {
+            content: ''; position: absolute; inset: 0; border-radius: inherit; opacity: 0; transition: opacity 0.5s;
+            background: radial-gradient(600px 240px at var(--mx, 50%) 0%, rgba(255, 255, 255, 0.55), transparent 70%);
+        }
+        .grid-block:hover { transform: translateY(-8px) scale(1.012); border-color: #FFFFFF; box-shadow: var(--glow); }
+        .grid-block:hover::before { opacity: 1; }
+        .grid-block .letter { font-size: 5.4rem; font-weight: 900; line-height: 1; opacity: 0.18; letter-spacing: -0.05em; color: var(--ink); animation: softFloat 9s ease-in-out infinite; }
+        .grid-block .label { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.22em; text-transform: uppercase; color: var(--ink); animation: textWave 4.5s ease-in-out infinite; }
+        .grid-block:nth-child(2) .label { color: var(--ink); }
+        .grid-block:nth-child(3) .label { color: var(--brand-ink); }
+        .grid-block:nth-child(4) .label { color: var(--success); }
+
+        /* ============ МАРКИЗА ============ */
+        .marquee { margin: 1.6rem 0 3.6rem; overflow: hidden; padding: 1rem 0; border-top: 1px solid rgba(255, 255, 255, 0.35); border-bottom: 1px solid rgba(255, 255, 255, 0.35); }
+        .marquee-track { display: flex; gap: 4rem; width: max-content; animation: marquee 26s linear infinite; }
+        .marquee:hover .marquee-track { animation-play-state: paused; }
+        .marquee-item { display: inline-flex; align-items: center; gap: 4rem; white-space: nowrap; font-size: 0.7rem; font-weight: 800; letter-spacing: 0.28em; text-transform: uppercase; color: rgba(36, 48, 41, 0.75); }
+        .marquee-item i { color: var(--ink); }
+        @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(calc(-50% - 2rem)); } }
+
+        /* ============ СТАТИСТИКА ============ */
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem; margin: 3rem 0 4rem; padding: 2.2rem 0; border-top: 1px solid rgba(255, 255, 255, 0.45); border-bottom: 1px solid rgba(255, 255, 255, 0.45); }
+        .stat-item { display: flex; flex-direction: column; gap: 0.4rem; position: relative; padding-right: 1.5rem; }
+        .stat-item:not(:first-child)::before { content: ''; position: absolute; left: -1rem; top: 10%; height: 80%; width: 1px; background: rgba(255, 255, 255, 0.45); }
+        .stat-item .number { font-size: clamp(1.9rem, 3.2vw, 2.8rem); font-weight: 900; letter-spacing: -0.03em; color: var(--ink); font-variant-numeric: tabular-nums; animation: textWave 5s ease-in-out infinite; }
+        .stat-item:nth-child(2) .number { animation-delay: 0.8s; }
+        .stat-item:nth-child(3) .number { animation-delay: 1.6s; }
+        .stat-item .label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(36, 48, 41, 0.75); }
+        .reveal-delay-1 { transition-delay: 0.1s !important; }
+        .reveal-delay-2 { transition-delay: 0.2s !important; }
+
+        /* ============ СЕКЦИИ ============ */
+        .section-head { text-align: center; margin-bottom: 2.2rem; }
+        .section-head .kicker { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.26em; text-transform: uppercase; color: rgba(36, 48, 41, 0.7); margin-bottom: 0.8rem; animation: textWave 5s ease-in-out infinite; }
+        .section-head h2 { font-size: clamp(1.9rem, 3.4vw, 2.8rem); font-weight: 900; letter-spacing: -0.04em; color: var(--ink); animation: softFloat 8s ease-in-out infinite; }
+        .section-head h3 { font-size: clamp(1.5rem, 2.8vw, 2.2rem); font-weight: 900; letter-spacing: -0.03em; color: var(--ink); animation: softFloat 8s ease-in-out infinite; }
+        .section-head p { color: rgba(36, 48, 41, 0.72); font-weight: 500; margin-top: 0.6rem; }
+
+        .glass { background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(16px); }
+
+        /* ---------- ГАЛЕРЕЯ / БАННЕРЫ ---------- */
+        .gallery { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 4rem 0; }
+        .gallery-item { position: relative; border-radius: var(--radius); overflow: hidden; aspect-ratio: 16/10; background: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.6); box-shadow: var(--shadow-soft); transition: transform 0.5s var(--ease-spring), box-shadow 0.5s; }
+        .gallery-item:hover { transform: translateY(-8px) scale(1.008); box-shadow: var(--glow); }
+        .gallery-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s var(--ease); }
+        .gallery-item:hover img { transform: scale(1.06); }
+        .gallery-item .tag { position: absolute; top: 1.2rem; left: 1.2rem; z-index: 2; background: rgba(36, 48, 41, 0.78); border: 1px solid rgba(255, 255, 255, 0.3); color: #FFFFFF; padding: 0.35rem 0.9rem; border-radius: 100px; font-size: 0.6rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; box-shadow: var(--shadow-soft); backdrop-filter: blur(8px); }
+        .gallery-placeholder { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.2rem; color: var(--ink-soft); background: linear-gradient(150deg, #FFFFFF 0%, #EAF2F9 100%); }
+        .gallery-placeholder i { font-size: 3rem; color: var(--brand-ink); opacity: 0.9; }
+
+        /* ---------- КАРТА ---------- */
+        .map-section { margin: 5rem 0; padding: 3rem; }
+        .map-container { width: 100%; height: 420px; border-radius: 20px; overflow: hidden; position: relative; background: var(--wash-2); border: 1px solid var(--line); }
+        .map-container iframe { width: 100%; height: 100%; border: none; filter: grayscale(0.2) contrast(0.95); }
+        .map-info { text-align: center; margin-top: 1.6rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; color: rgba(255, 255, 255, 0.9); font-size: 0.92rem; font-weight: 500; }
+        .map-info p i { color: #FFFFFF; }
+        .map-link { display: inline-flex; align-items: center; gap: 8px; padding: 0.8rem 1.7rem; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 100px; color: #FFFFFF; text-decoration: none; font-weight: 800; font-size: 0.82rem; transition: all 0.35s var(--ease); }
+        .map-link:hover { background: #243029; color: #FFFFFF; border-color: #243029; transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+
+        /* ---------- СОЦСЕТИ ---------- */
+        .social-section { margin: 4rem 0; padding: 3rem 2.5rem; text-align: center; }
+        .social-links { display: flex; justify-content: center; gap: 1.2rem; flex-wrap: wrap; margin-top: 0.6rem; }
+        .social-link {
+            display: inline-flex; align-items: center; gap: 10px; padding: 0.9rem 1.7rem;
+            background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.5); color: #FFFFFF; text-decoration: none; border-radius: 100px;
+            font-weight: 800; font-size: 0.9rem; transition: all 0.4s var(--ease);
+        }
+        .social-link i { font-size: 1.15rem; transition: transform 0.4s var(--ease-spring); }
+        .social-link:hover { transform: translateY(-4px); background: #243029; color: #FFFFFF; border-color: #243029; box-shadow: var(--shadow-soft); }
+        .social-link:nth-child(1):hover { background: #2AABEE; border-color: #2AABEE; }
+        .social-link:nth-child(2):hover { background: #25D366; border-color: #25D366; }
+        .social-link:nth-child(3):hover { background: #7FB3E8; border-color: #7FB3E8; }
+
+        /* ============ ФУТЕР ============ */
+        .footer { display: flex; justify-content: space-between; align-items: center; gap: 1.4rem; flex-wrap: wrap; padding: 2rem 0 0; margin-top: 4rem; border-top: 1px solid rgba(255, 255, 255, 0.35); color: rgba(255, 255, 255, 0.65); font-size: 0.82rem; font-weight: 500; }
+        .footer-links { display: flex; gap: 1.4rem; }
+        .footer-links span { cursor: pointer; transition: color 0.3s; font-weight: 700; }
+        .footer-links span:hover { color: #FFFFFF; }
+        .footer .social { display: flex; gap: 1rem; font-size: 1.05rem; }
+        .footer .social i { cursor: pointer; transition: color 0.3s, transform 0.3s var(--ease-spring); }
+        .footer .social i:hover { color: #FFFFFF; transform: translateY(-2px); }
+
+        /* ============ ПОЯВЛЕНИЕ ПРИ СКРОЛЛЕ ============ */
+        [data-reveal] { opacity: 0; transform: translateY(36px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); will-change: opacity, transform; }
+        [data-reveal="left"] { transform: translateX(-44px); }
+        [data-reveal="right"] { transform: translateX(44px); }
+        [data-reveal].seen { opacity: 1; transform: none; }
+
+        /* ============ МОДАЛКИ ============ */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 1.4rem;
+            background: rgba(23, 43, 62, 0.45); backdrop-filter: blur(10px);
+            opacity: 0; visibility: hidden; transition: opacity 0.35s, visibility 0.35s;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal {
+            width: min(440px, 100%); max-height: 92vh; overflow-y: auto;
+            background: var(--glass); border: 1px solid rgba(255, 255, 255, 0.65); border-radius: var(--radius);
+            padding: 2.4rem 2rem; position: relative; color: var(--ink);
+            box-shadow: var(--shadow);
+            transform: translateY(22px) scale(0.98); transition: transform 0.4s var(--ease-spring);
+        }
+        .modal-overlay.active .modal { transform: none; }
+        .modal-close { position: absolute; top: 1.1rem; right: 1.2rem; border: none; background: rgba(36, 48, 41, 0.1); color: var(--ink); width: 38px; height: 38px; border-radius: 100%; font-size: 1.35rem; line-height: 1; cursor: pointer; transition: all 0.3s; }
+        .modal-close:hover { background: #243029; color: #FFFFFF; transform: rotate(90deg); }
+        .modal h2 { font-size: 1.7rem; font-weight: 900; letter-spacing: -0.03em; margin-bottom: 0.25rem; color: var(--ink); }
+        .modal-subtitle { color: var(--ink-soft); font-size: 0.9rem; font-weight: 500; margin-bottom: 1.3rem; }
+        .modal-logo { max-width: 140px; max-height: 70px; object-fit: contain; margin: 0 auto 1rem; display: block; }
+        .modal .hint { font-size: 0.82rem; font-weight: 500; color: var(--ink-faint); line-height: 1.55; margin: 0.75rem 0 1rem; }
+        .modal .hint a { color: var(--brand-deep); font-weight: 700; }
+
+        .method-switch { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 5px; background: var(--wash-2); border: 1px solid var(--line); border-radius: 100px; margin-bottom: 1.5rem; }
+        .method-tab { border: none; background: transparent; color: var(--ink-soft); font-weight: 800; font-size: 0.76rem; letter-spacing: 0.06em; text-transform: uppercase; padding: 0.65rem 1rem; border-radius: 100px; cursor: pointer; transition: all 0.35s var(--ease); display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .method-tab.active { background: linear-gradient(135deg, var(--brand), var(--brand-deep)); color: var(--ink); box-shadow: 0 10px 24px -10px rgba(94, 143, 189, 0.5); }
+
+        .field { margin-bottom: 1.1rem; }
+        .field label { display: block; font-size: 0.68rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 0.45rem; }
+        .input {
+            width: 100%; padding: 0.85rem 1.1rem; border-radius: 14px; font-size: 1rem; font-weight: 600;
+            background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); color: var(--ink);
+            transition: border-color 0.3s, box-shadow 0.3s; outline: none; font-family: inherit;
+        }
+        .input::placeholder { color: var(--ink-faint); }
+        .input:focus { border-color: var(--brand-deep); box-shadow: 0 0 0 3px rgba(149, 184, 217, 0.35); }
+        textarea.input { resize: vertical; }
+
+        .code-row { display: flex; gap: 9px; justify-content: center; margin: 1.2rem 0 1.3rem; }
+        .code-input {
+            width: 52px; height: 60px; text-align: center; font-size: 1.5rem; font-weight: 900; border-radius: 14px;
+            background: rgba(255, 255, 255, 0.92); border: 1px solid var(--line); color: var(--ink); outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s, transform 0.25s var(--ease-spring);
+        }
+        .code-input:focus { border-color: var(--brand-deep); box-shadow: 0 0 0 3px rgba(149, 184, 217, 0.35); transform: translateY(-2px); }
+
+        .staff-fallback-toggle { text-align: center; margin-top: 1rem; font-size: 0.8rem; font-weight: 700; color: var(--ink-faint); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; transition: opacity 0.25s, color 0.25s; }
+        .staff-fallback-toggle:hover { opacity: 1; color: var(--brand-deep); }
+
+        /* ============ ДАШБОРД ============ */
+        .dashboard { display: none; }
+        .dashboard.active { display: block; }
+        .dash-wrap { position: relative; z-index: 3; max-width: 1280px; margin: 0 auto; padding: 1.6rem 2.5rem 4rem; }
+        .dash-header { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1.4rem; margin-bottom: 2rem; border-radius: 100px; background: rgba(255, 255, 255, 0.16); border: 1px solid rgba(255, 255, 255, 0.45); backdrop-filter: blur(16px); }
+        .dash-main { display: grid; grid-template-columns: 240px 1fr; gap: 2rem; align-items: start; }
+        .dash-content { min-width: 0; }
+
+        .dash-sidebar { background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.4rem; display: flex; flex-direction: column; gap: 1rem; position: sticky; top: 1.4rem; box-shadow: var(--shadow-soft); }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li { margin-bottom: 0.35rem; }
+        .sidebar-menu a { display: flex; align-items: center; gap: 12px; padding: 0.75rem 0.95rem; border-radius: 13px; text-decoration: none; color: var(--ink-soft); font-weight: 700; font-size: 0.9rem; border: 1px solid transparent; transition: all 0.3s var(--ease); }
+        .sidebar-menu a i { width: 20px; text-align: center; color: var(--brand-ink); }
+        .sidebar-menu a:hover { background: rgba(94, 143, 189, 0.1); color: var(--ink); }
+        .sidebar-menu a.active { background: linear-gradient(135deg, rgba(94, 143, 189, 0.22), rgba(94, 143, 189, 0.08)); border-color: rgba(94, 143, 189, 0.4); color: var(--ink); }
+        .sidebar-user { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--line); }
+        .sidebar-user-name { font-weight: 800; font-size: 0.95rem; color: var(--ink); }
+        .sidebar-user-email { font-size: 0.78rem; color: var(--ink-faint); font-weight: 600; margin-top: 2px; word-break: break-all; }
+        .sidebar-logout { margin-top: 0.8rem; width: 100%; padding: 0.7rem; border-radius: 12px; background: var(--error-bg); border: 1px solid rgba(180, 85, 58, 0.25); color: var(--error); font-weight: 800; font-size: 0.8rem; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .sidebar-logout:hover { background: var(--error); color: #fff; }
+
+        .page { display: none; }
+        .page.active { display: block; animation: pageIn 0.5s var(--ease); }
+        @keyframes pageIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+        .page-header { margin-bottom: 1.8rem; }
+        .page-kicker { font-size: 0.62rem; font-weight: 800; letter-spacing: 0.24em; text-transform: uppercase; color: var(--brand-deep); margin-bottom: 0.4rem; }
+        .page-title { font-size: clamp(1.9rem, 3vw, 2.5rem); font-weight: 900; letter-spacing: -0.04em; color: var(--ink); }
+        .page-subtitle { color: var(--ink-soft); font-weight: 500; margin-top: 0.3rem; }
+
+        .card { background: var(--glass); border: 1px solid var(--line); border-radius: var(--radius); padding: 1.7rem; margin-bottom: 1.4rem; box-shadow: var(--shadow-soft); color: var(--ink); }
+        .pop-in { animation: popIn 0.55s var(--ease-spring); }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.97) translateY(10px); } to { opacity: 1; transform: none; } }
+
+        .card-title { font-weight: 800; font-size: 1.02rem; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 10px; }
+        .card-title i { color: var(--brand-deep); }
+
+        /* QR */
+        .qr-card { text-align: center; }
+        .qr-image { max-width: 240px; width: 100%; border-radius: 20px; background: #fff; padding: 12px; margin-bottom: 1.1rem; box-shadow: var(--shadow); }
+        .qr-timer { font-size: 0.82rem; color: var(--ink-soft); font-weight: 600; margin-bottom: 0.8rem; display: inline-flex; align-items: center; gap: 8px; }
+        .qr-bar { height: 6px; border-radius: 100px; background: rgba(94, 143, 189, 0.16); overflow: hidden; max-width: 240px; margin: 0 auto; }
+        .qr-bar-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--brand), var(--brand-deep)); transition: width 1s linear; }
+
+        /* Зёрна */
+        .bean-icon { font-size: 2rem; }
+        .beans-label { font-weight: 800; font-size: 1rem; }
+        .beans-value { font-size: clamp(2.2rem, 4vw, 3rem); font-weight: 900; letter-spacing: -0.03em; color: var(--brand-ink); margin: 0.8rem 0; }
+        .beans-progress { height: 10px; border-radius: 100px; background: rgba(94, 143, 189, 0.16); overflow: hidden; }
+        .beans-progress-fill { height: 100%; border-radius: 100px; background: linear-gradient(90deg, var(--brand), #243029); transition: width 0.8s var(--ease); }
+        .beans-hint { margin-top: 0.7rem; font-size: 0.85rem; font-weight: 600; color: var(--ink-soft); }
+
+        /* Таблицы */
+        .table-wrap { overflow-x: auto; }
+        .table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        .table th { text-align: left; padding: 0.75rem 0.9rem; font-size: 0.64rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); border-bottom: 1px solid var(--line); }
+        .table td { padding: 0.75rem 0.9rem; border-bottom: 1px solid var(--line-soft); font-weight: 600; }
+        .table tr:last-child td { border-bottom: none; }
+        .table tr:hover td { background: rgba(94, 143, 189, 0.05); }
+
+        .badge { display: inline-block; padding: 0.2rem 0.65rem; border-radius: 100px; font-size: 0.74rem; font-weight: 800; }
+        .badge-success { background: var(--success-bg); color: var(--success); }
+        .badge-error { background: var(--error-bg); color: var(--error); }
+        .badge-info { background: rgba(149, 184, 217, 0.2); color: var(--brand-ink); }
+        .badge-amber { background: rgba(201, 141, 75, 0.16); color: #A9742F; }
+
+        /* ---------- СКАНЕР ---------- */
+        #scanVideo { width: 100%; max-height: 340px; object-fit: cover; border-radius: var(--radius-sm); background: #000; border: 1px solid var(--line); display: none; margin-bottom: 1rem; }
+        .scan-frame { position: relative; border-radius: var(--radius-sm); overflow: hidden; display: none; }
+        .scan-frame::after { content: ''; position: absolute; left: 10%; right: 10%; top: 0; height: 3px; background: linear-gradient(90deg, transparent, var(--brand-deep), transparent); box-shadow: 0 0 18px var(--brand-deep); animation: scanline 2.4s ease-in-out infinite; }
+        @keyframes scanline { 0% { top: 6%; } 50% { top: 92%; } 100% { top: 6%; } }
+
+        /* ---------- ТОСТ ---------- */
+        .toast { position: fixed; bottom: 34px; left: 50%; transform: translateX(-50%) translateY(120px); background: #FFFFFF; color: var(--ink); padding: 15px 30px; border-radius: 100px; font-size: 0.92rem; font-weight: 800; z-index: 3000; opacity: 0; transition: all 0.5s var(--ease-spring); box-shadow: var(--shadow); max-width: min(90vw, 560px); text-align: center; line-height: 1.45; border: 1px solid rgba(36, 48, 41, 0.15); }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .toast.success { color: var(--success); border-color: rgba(62, 122, 82, 0.45); }
+        .toast.error { color: var(--error); border-color: rgba(180, 85, 58, 0.45); }
+
+        .divider-line { height: 1px; margin: 1.4rem 0; background: var(--line); }
+
+        .logo-upload-area { border: 2px dashed var(--line); border-radius: var(--radius-sm); padding: 2.4rem 1.5rem; text-align: center; cursor: pointer; color: var(--ink-soft); transition: all 0.35s; }
+        .logo-upload-area:hover { border-color: var(--brand-deep); background: rgba(94, 143, 189, 0.07); }
+        .logo-upload-area i { font-size: 2.2rem; color: var(--brand-ink); margin-bottom: 0.5rem; display: block; }
+        .logo-upload-area small { color: var(--ink-faint); display: block; margin-top: 0.3rem; }
+        .logo-preview { max-width: 220px; max-height: 110px; margin: 1.2rem auto; display: block; object-fit: contain; border-radius: var(--radius-xs); background: var(--wash); padding: 8px; border: 1px solid var(--line); }
+
+        .mini-panel { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: var(--wash); border: 1px solid var(--line); border-radius: var(--radius-sm); margin: 1.2rem 0; }
+        .mini-panel img { max-height: 44px; object-fit: contain; }
+
+        code { background: var(--wash); padding: 3px 10px; border-radius: 8px; border: 1px solid var(--line); }
+
+        /* ============ АДАПТИВ ============ */
+        @media (max-width: 1000px) {
+            .hero { grid-template-columns: 1fr; gap: 3rem; text-align: center; }
+            .hero p { max-width: 100%; margin-left: auto; margin-right: auto; }
+            .hero-actions { justify-content: center; }
+            .hero-tag { margin: 0 auto 1.4rem; }
+            .hero-grid { max-width: 440px; margin: 0 auto; }
+            .stats { grid-template-columns: 1fr 1fr; text-align: center; }
+            .stat-item { padding: 0; }
+            .stat-item:not(:first-child)::before { display: none; }
+            .gallery { grid-template-columns: 1fr; }
+            .dash-main { grid-template-columns: 1fr; }
+            .dash-sidebar { position: static; }
+        }
+        @media (max-width: 620px) {
+            .site, .dash-wrap { padding: 1rem 1.1rem 2.4rem; }
+            .header, .dash-header { flex-direction: column; gap: 1rem; border-radius: 30px; padding: 1.1rem; }
+            .nav { gap: 1.4rem; flex-wrap: wrap; justify-content: center; }
+            .nav-right { width: 100%; justify-content: space-between; }
+            .hero h1 { font-size: 2.9rem; }
+            .hero-grid { max-width: 320px; gap: 12px; }
+            .grid-block { padding: 1rem; }
+            .grid-block .letter { font-size: 3.5rem; }
+            .stats { grid-template-columns: 1fr; gap: 1.6rem; text-align: center; }
+            .stat-item::after { display: none; }
+            .footer { flex-direction: column; text-align: center; }
+            .footer-links { flex-wrap: wrap; justify-content: center; }
+            .modal { padding: 2rem 1.4rem; }
+            .code-row { gap: 7px; }
+            .code-input { width: 44px; height: 54px; font-size: 1.35rem; }
+            .map-section, .social-section { padding: 1.8rem 1.4rem; }
+            .map-container { height: 300px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+            [data-reveal] { opacity: 1; transform: none; }
+            .bean { animation: none; }
+        }
+
+/* ================================================================
+   ПРОЗРАЧНЫЕ ПРОСТЕЦКЕ РАМКИ (GLASS) + ВИДИМЫЙ АНИМИРОВАННЫЙ ТЕКСТ
+   — переопределяет белые рамки/белый текст поверх каскада —
+   ================================================================ */
+.glass,
+.map-section, .map-container, .map-info, .map-link,
+.social-section, .social-link,
+.gallery-item, .gallery-placeholder, .gallery-item .tag,
+.grid-block, .badge-pill, .hero-tag, .stats, .stat-item,
+.marquee, .section-head, .footer {
+    background: rgba(255, 255, 255, 0.06) !important;
+    border-color: rgba(255, 255, 255, 0.38) !important;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    animation: frameBreath 5.5s ease-in-out infinite, softFloat 11s ease-in-out infinite;
+}
+
+/* читаемый тёмный текст во всех рамках */
+.map-info, .map-info p, .map-info i, .map-info a,
+.map-link, .map-link i,
+.social-link, .social-link i,
+.gallery-placeholder p, .gallery-placeholder i,
+.grid-block .label, .grid-block .letter,
+.badge-pill, .badge-pill i, .badge-pill span,
+.hero-tag, .hero-tag i,
+.marquee-item, .marquee-item i,
+.stat-item .number, .stat-item .label,
+.section-head .kicker, .section-head h2, .section-head h3, .section-head p,
+.footer, .footer span, .footer a, .footer i,
+.footer-links span, .footer .social i {
+    color: var(--ink) !important;
+    animation: textWave 5.5s ease-in-out infinite;
+}
+.map-info p, .footer, .section-head .kicker { animation: softFloat 8s ease-in-out infinite; }
+.social-link, .map-link, .marquee-item { animation: softFloat 8s ease-in-out infinite; }
+.hero-tag, .badge-pill { animation: frameBreath 4.5s ease-in-out infinite, softFloat 9s ease-in-out infinite; }
+.section-head h2, .section-head h3 { animation: shimmer 7s linear infinite; }
+.grid-block .letter { animation: softFloat 8s ease-in-out infinite, textWave 6s ease-in-out infinite; }
+.map-section .map-container { border-radius: 20px; }
+</style>
+</head>
+<body>
+
+    <!-- Парящие кофейные зёрна -->
+    <div class="beans-layer" id="beansLayer" aria-hidden="true">
+        <i class="bean" style="--d:12s;--dl:0s;left:6%;top:16%;width:46px;height:60px;"></i>
+        <i class="bean" style="--d:15s;--dl:.8s;left:88%;top:12%;width:34px;height:44px;"></i>
+        <i class="bean" style="--d:17s;--dl:1.6s;left:16%;top:66%;width:56px;height:72px;"></i>
+        <i class="bean" style="--d:13s;--dl:2.4s;left:78%;top:70%;width:40px;height:52px;"></i>
+        <i class="bean" style="--d:19s;--dl:.4s;left:46%;top:8%;width:30px;height:40px;"></i>
+        <i class="bean" style="--d:14s;--dl:1.2s;left:30%;top:90%;width:48px;height:62px;"></i>
+        <i class="bean" style="--d:16s;--dl:2s;left:64%;top:34%;width:26px;height:34px;"></i>
+        <i class="bean" style="--d:12s;--dl:3s;left:8%;top:42%;width:36px;height:46px;"></i>
+        <i class="bean" style="--d:18s;--dl:.2s;left:92%;top:46%;width:52px;height:66px;"></i>
+        <i class="bean" style="--d:15s;--dl:2.8s;left:55%;top:80%;width:32px;height:42px;"></i>
+        <i class="bean" style="--d:13s;--dl:1s;left:70%;top:92%;width:44px;height:58px;"></i>
+        <i class="bean" style="--d:17s;--dl:3.4s;left:37%;top:50%;width:22px;height:30px;"></i>
+    </div>
+
+    <!-- ================= ЛЕНДИНГ ================= -->
+    <div class="site" id="landing">
+
+        <header class="header" id="siteHeader">
+            <div class="logo" id="mainLogo">
+                <span class="logo-text">ПИПЛ</span>
+            </div>
+            <div class="nav-right">
+                <div class="nav">
+                    <span onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})">Акции</span>
+                    <span onclick="document.getElementById('mapSection').scrollIntoView({behavior:'smooth'})">Где мы</span>
+                    <span onclick="document.getElementById('socialSection').scrollIntoView({behavior:'smooth'})">Контакты</span>
+                </div>
+                <button type="button" class="btn btn-primary nav-btn" onclick="openModal()"><i class="fas fa-sign-in-alt"></i> Войти</button>
+            </div>
+        </header>
+
+        <div class="badge-pill">
+            <span class="dot-live"></span>
+            <span class="label">Specialty Coffee Shop</span>
+            <span class="divider"></span>
+            <span class="date">Сахалин · свежая обжарка</span>
+        </div>
+
+        <section class="hero">
+            <div class="hero-left">
+                <span class="hero-tag"><i class="fas fa-mug-hot"></i> specialty coffee · ваш клиент — наша ценность</span>
+                <h1>ПИПЛ <span class="sep">·</span><br><span class="grad-text">кофе для тебя</span></h1>
+                <p>Specialty-кофе со свежей обжарки и атмосфера, в которой хочется остаться. Каждая 6-я чашка — в подарок: копите кофейные зёрна и забирайте бесплатный напиток.</p>
+                <div class="hero-actions">
+                    <button type="button" class="btn btn-primary" onclick="openModal()"><i class="fas fa-arrow-right"></i> Присоединиться</button>
+                    <button type="button" class="btn btn-ghost" onclick="document.getElementById('gallery').scrollIntoView({behavior:'smooth'})"><i class="fas fa-record-vinyl"></i> Наша афиша</button>
+                </div>
+            </div>
+            <div class="hero-right">
+                <div class="hero-grid" id="heroGrid"></div>
+            </div>
+        </section>
+
+        <div class="marquee" data-reveal>
+            <div class="marquee-track" id="marqueeTrack">
+                <span class="marquee-item">Specialty Coffee <i class="fas fa-mug-hot"></i> Свежая обжарка <i class="fas fa-record-vinyl"></i> Виниловые пятницы <i class="fas fa-heart"></i> Сахалин <i class="fas fa-bean"></i> Каждая 6-я чашка в подарок <i class="fas fa-mug-hot"></i> Analog Feel</span>
+                <span class="marquee-item">Specialty Coffee <i class="fas fa-mug-hot"></i> Свежая обжарка <i class="fas fa-record-vinyl"></i> Виниловые пятницы <i class="fas fa-heart"></i> Сахалин <i class="fas fa-bean"></i> Каждая 6-я чашка в подарок <i class="fas fa-mug-hot"></i> Analog Feel</span>
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item" data-reveal><div class="number">6 · 1</div><div class="label">Зёрен на бесплатный кофе</div></div>
+            <div class="stat-item reveal-delay-1" data-reveal><div class="number">100%</div><div class="label">Specialty арабика</div></div>
+            <div class="stat-item reveal-delay-2" data-reveal><div class="number">33 RPM</div><div class="label">Виниловые пятницы</div></div>
+        </div>
+
+        <div class="section-head" data-reveal>
+            <div class="kicker">Что у нас нового</div>
+            <h2>Акции и афиша</h2>
+            <p>Ловите моменты — они пролетают быстрее дымки над чашкой</p>
+        </div>
+        <div class="gallery" id="gallery">
+            <div class="gallery-item reveal-delay-1" data-reveal>
+                <div class="gallery-placeholder"><i class="fas fa-record-vinyl"></i><span style="font-size:0.95rem; font-weight:700;">Виниловый вечер</span></div>
+            </div>
+            <div class="gallery-item reveal-delay-2" data-reveal>
+                <div class="gallery-placeholder"><i class="fas fa-mug-hot"></i><span style="font-size:0.95rem; font-weight:700;">Специальное меню</span></div>
+            </div>
+        </div>
+
+        <section class="glass map-section reveal-delay-1" data-reveal id="mapSection">
+            <div class="section-head">
+                <div class="kicker">Сахалин · Анива</div>
+                <h2><i class="fas fa-map-marker-alt" style="margin-right: 10px; color: #243029;"></i>Где нас найти</h2>
+            </div>
+            <div class="map-container" id="mapContainer"></div>
+            <div class="map-info">
+                <p><i class="fas fa-location-arrow" style="margin-right: 8px;"></i>Нажмите на маркер, чтобы построить маршрут</p>
+                <a href="https://yandex.ru/maps/-/CTh8qE7a" target="_blank" rel="noopener" class="map-link"><i class="fas fa-external-link-alt"></i> Открыть в Яндекс Картах</a>
+            </div>
+        </section>
+
+        <section class="glass social-section reveal-delay-1" data-reveal id="socialSection">
+            <div class="section-head">
+                <div class="kicker">Будем на связи</div>
+                <h3><i class="fas fa-share-alt" style="margin-right: 10px; color: #243029;"></i>Свяжитесь с нами</h3>
+            </div>
+            <div class="social-links" id="socialLinks"></div>
+        </section>
+
+        <footer class="footer reveal-delay-1" data-reveal>
+            <div class="copy"><i class="far fa-copyright"></i> 2026 ПИПЛ · specialty coffee shop</div>
+            <div class="footer-links"><span onclick="document.getElementById('mapSection').scrollIntoView({behavior:'smooth'})">Карта</span><span onclick="document.getElementById('socialSection').scrollIntoView({behavior:'smooth'})">Контакты</span></div>
+            <div class="social"><i class="fab fa-instagram"></i><i class="fab fa-telegram"></i><i class="fab fa-vk"></i></div>
+        </footer>
+    </div>
+
+    <!-- ================= МОДАЛКА ВХОДА ================= -->
+    <div class="modal-overlay" id="loginModal" role="dialog" aria-modal="true">
+        <div class="modal">
+            <button type="button" class="modal-close" onclick="closeModal()" aria-label="Закрыть">×</button>
+            <img id="modalLogo" class="modal-logo hidden" src="" alt="ПИПЛ">
+            <h2>ПИПЛ</h2>
+            <p class="modal-subtitle">Вход в систему лояльности</p>
+            <div class="method-switch">
+                <button type="button" class="method-tab active" data-method="tg" onclick="switchClientMethod('tg', this)"><i class="fab fa-telegram-plane"></i> Telegram</button>
+                <button type="button" class="method-tab" data-method="email" onclick="switchClientMethod('email', this)"><i class="fas fa-at"></i> Email</button>
+            </div>
+
+            <div id="tgLogin">
+                <div id="tgStep1">
+                    <div class="field">
+                        <label for="tgUsername">Ваш ник в Telegram</label>
+                        <input type="text" class="input" id="tgUsername" placeholder="@your_nick" autocomplete="off">
+                    </div>
+                    <p class="hint">Сначала напишите боту <a href="https://t.me/PiplCoffee65_bot" target="_blank" rel="noopener">@PiplCoffee65_bot</a> команду <strong>/start</strong> — иначе мы не сможем отправить вам пароль.</p>
+                    <button type="button" class="btn btn-primary btn-full" onclick="requestTgCode()"><i class="fab fa-telegram-plane"></i> Получить пароль в Telegram</button>
+                </div>
+                <div id="tgStep2" class="hidden">
+                    <p style="text-align:center; font-size:0.92rem; margin-bottom:1rem; font-weight:600; color:var(--ink-soft);">Пароль отправлен на <strong id="tgUserDisplay" style="color: var(--brand-deep);">@…</strong>. Загляните в Telegram.</p>
+                    <div class="field">
+                        <label for="tgCode">Одноразовый пароль (6 цифр)</label>
+                        <input type="text" class="input" id="tgCode" maxlength="6" inputmode="numeric" autocomplete="one-time-code" oninput="this.value=this.value.replace(/\D/g,'')">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-full" onclick="verifyTgCode()"><i class="fas fa-check"></i> Войти</button>
+                    <div class="staff-fallback-toggle" onclick="backToTgStep1()">← Отправить пароль ещё раз</div>
+                </div>
+            </div>
+
+            <div id="emailLogin" class="hidden">
+                <div id="clientStep1">
+                    <div class="field">
+                        <label for="clientEmail">Email</label>
+                        <input type="email" class="input" id="clientEmail" placeholder="your@email.com" autocomplete="email">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-full" onclick="sendClientCode()"><i class="fas fa-paper-plane"></i> Получить код</button>
+                </div>
+                <div id="clientStep2" class="hidden">
+                    <p style="text-align:center; font-size:0.92rem; margin-bottom:1rem; font-weight:600; color:var(--ink-soft);">Код отправлен на <strong id="emailDisplay" style="color: var(--brand-deep);"></strong></p>
+                    <div class="code-row" role="group" aria-label="Код из 6 цифр из письма">
+                        <input type="text" class="code-input" maxlength="1" data-i="0" inputmode="numeric" autocomplete="one-time-code" aria-label="Цифра 1 из 6">
+                        <input type="text" class="code-input" maxlength="1" data-i="1" inputmode="numeric" autocomplete="off" aria-label="Цифра 2 из 6">
+                        <input type="text" class="code-input" maxlength="1" data-i="2" inputmode="numeric" autocomplete="off" aria-label="Цифра 3 из 6">
+                        <input type="text" class="code-input" maxlength="1" data-i="3" inputmode="numeric" autocomplete="off" aria-label="Цифра 4 из 6">
+                        <input type="text" class="code-input" maxlength="1" data-i="4" inputmode="numeric" autocomplete="off" aria-label="Цифра 5 из 6">
+                        <input type="text" class="code-input" maxlength="1" data-i="5" inputmode="numeric" autocomplete="off" aria-label="Цифра 6 из 6">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-full" onclick="verifyClientCode()"><i class="fas fa-check"></i> Войти</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= КАБИНЕТ ================= -->
+    <div class="dashboard" id="dashboard">
+        <div class="dash-wrap">
+            <header class="dash-header">
+                <div class="logo" id="dashLogo"></div>
+                <div class="nav-right"><button type="button" class="btn btn-primary nav-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button></div>
+            </header>
+
+            <div class="dash-main">
+                <div class="dash-content">
+
+                    <!-- QR -->
+                    <div class="page" id="page-qr">
+                        <div class="page-header">
+                            <div class="page-kicker">Бонусная карта</div>
+                            <h1 class="page-title">Ваш QR-код</h1>
+                            <p class="page-subtitle">Покажите бариста для начисления зёрен</p>
+                        </div>
+                        <div class="card qr-card pop-in">
+                            <img id="qrImage" class="qr-image" src="" alt="QR-код">
+                            <div class="qr-timer"><i class="fas fa-sync-alt"></i> Обновится через <strong id="qrCountdown">60</strong>с</div>
+                            <div class="qr-bar"><div class="qr-bar-fill" id="qrBar" style="width:100%"></div></div>
+                            <!-- ДЛЯ БУДУЩЕГО ANDROID ПРИЛОЖЕНИЯ: QR содержит JSON строку. Приложение считывает её, парсит и отправляет POST на /api/admin/scan с телом { qrData: "считанная строка" } -->
+                        </div>
+                    </div>
+
+                    <!-- Профиль -->
+                    <div class="page" id="page-profile">
+                        <div class="page-header">
+                            <div class="page-kicker">Личный кабинет</div>
+                            <h1 class="page-title">Профиль</h1>
+                            <p class="page-subtitle">Ваша статистика лояльности</p>
+                        </div>
+                        <div class="card beans-card pop-in">
+                            <div style="display:flex; align-items:center; gap:1rem; margin-bottom:0.4rem;">
+                                <span class="bean-icon">☕</span>
+                                <div>
+                                    <div class="beans-label">Кофейные зёрна</div>
+                                    <div style="font-weight:600; font-size:0.9rem; opacity:0.65; color:var(--brand-ink);">1 покупка = 1 зерно</div>
+                                </div>
+                            </div>
+                            <div class="beans-value" id="beansValue">0 / 6</div>
+                            <div class="beans-progress"><div class="beans-progress-fill" id="beansProgress" style="width:0%"></div></div>
+                            <div class="beans-hint" id="beansHint">Соберите 6 зёрен для бесплатного напитка</div>
+                        </div>
+                        <div class="card">
+                            <div class="card-title"><i class="fas fa-history"></i> История операций</div>
+                            <div class="table-wrap">
+                                <table class="table" id="transactionsTable"><thead><tr><th>Дата</th><th>Описание</th><th>Зёрна</th></tr></thead><tbody></tbody></table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Сканер -->
+                    <div class="page" id="page-scan">
+                        <div class="page-header">
+                            <div class="page-kicker">Работа с клиентами</div>
+                            <h1 class="page-title">Сканер QR</h1>
+                            <p class="page-subtitle">Сканируйте код клиента камерой или вставьте вручную</p>
+                        </div>
+                        <div class="card pop-in">
+                            <button type="button" class="btn btn-blue" id="btnToggleCam" onclick="toggleCamera()"><i class="fas fa-camera"></i> Сканировать камерой</button>
+                            <div class="scan-frame" id="scanFrame"><video id="scanVideo" muted playsinline></video></div>
+                            <div class="divider-line" style="margin-top:1.2rem;"></div>
+                            <div class="field" style="margin-top:1.4rem;"><label for="qrDataInput">Данные QR (JSON)</label><input type="text" class="input" id="qrDataInput" placeholder='{"userId":1,"timestamp":...}'></div>
+                            <button type="button" class="btn btn-primary" onclick="scanQR()"><i class="fas fa-qrcode"></i> Сканировать</button>
+                        </div>
+                        <div id="scannedResult" class="hidden">
+                            <div class="card pop-in">
+                                <div class="card-title"><i class="fas fa-user-check"></i> Клиент найден</div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.4rem 0;">
+                                    <div><div style="font-size:0.66rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--brand-ink);">Имя</div><div style="font-weight:800; font-size:1.05rem;" id="scannedName">—</div></div>
+                                    <div><div style="font-size:0.66rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--brand-ink);">Email</div><div style="font-weight:700;" id="scannedEmail">—</div></div>
+                                    <div><div style="font-size:0.66rem; font-weight:800; letter-spacing:0.12em; text-transform:uppercase; color:var(--brand-ink);">Зёрна</div><div style="font-weight:900; font-size:1.5rem; color: #A9742F;" id="scannedBeans">0</div></div>
+                                </div>
+                                <div style="display:flex; gap:0.8rem; flex-wrap:wrap;">
+                                    <button type="button" class="btn btn-green" id="btnRedeem" onclick="adminRedeem()" disabled><i class="fas fa-ticket-alt"></i> Списать 6 зёрен</button>
+                                    <button type="button" class="btn btn-ghost" onclick="openBeanModal('add')"><i class="fas fa-plus"></i> Начислить</button>
+                                    <button type="button" class="btn btn-ghost" onclick="openBeanModal('deduct')"><i class="fas fa-minus"></i> Списать</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Клиенты -->
+                    <div class="page" id="page-clients">
+                        <div class="page-header">
+                            <div class="page-kicker">База участников</div>
+                            <h1 class="page-title">Клиенты</h1>
+                            <p class="page-subtitle">Участники программы лояльности</p>
+                        </div>
+                        <div class="card pop-in">
+                            <div class="table-wrap"><table class="table" id="clientsTable"><thead><tr><th>Имя</th><th>Email</th><th>Зёрна</th><th>Потрачено</th></tr></thead><tbody></tbody></table></div>
+                        </div>
+                    </div>
+
+                    <!-- Баннеры -->
+                    <div class="page" id="page-banners">
+                        <div class="page-header">
+                            <div class="page-kicker">Контент</div>
+                            <h1 class="page-title">Баннеры</h1>
+                            <p class="page-subtitle">Управление акциями на главной</p>
+                        </div>
+                        <div class="card pop-in">
+                            <div class="card-title"><i class="fas fa-image"></i> Баннер 1</div>
+                            <div class="field"><label for="banner1Url">URL изображения</label><input type="text" class="input" id="banner1Url" placeholder="https://..."></div>
+                            <div class="field"><label for="banner1Title">Заголовок</label><input type="text" class="input" id="banner1Title" placeholder="Название акции"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveBanner(1)"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-title"><i class="fas fa-image"></i> Баннер 2</div>
+                            <div class="field"><label for="banner2Url">URL изображения</label><input type="text" class="input" id="banner2Url" placeholder="https://..."></div>
+                            <div class="field"><label for="banner2Title">Заголовок</label><input type="text" class="input" id="banner2Title" placeholder="Название акции"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveBanner(2)"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                    </div>
+
+                    <!-- Плитки -->
+                    <div class="page" id="page-tiles">
+                        <div class="page-header">
+                            <div class="page-kicker">Контент</div>
+                            <h1 class="page-title">Плитки ПИПЛ</h1>
+                            <p class="page-subtitle">Текст на плитках в герое</p>
+                        </div>
+                        <div class="card pop-in">
+                            <div class="card-title">Плитка 1 — П</div>
+                            <div class="field"><label for="tile1Label">Подпись</label><input type="text" class="input" id="tile1Label" placeholder="ФИЛОСОФИЯ"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveTile(1)"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Плитка 2 — И</div>
+                            <div class="field"><label for="tile2Label">Подпись</label><input type="text" class="input" id="tile2Label" placeholder="ИСТОРИЯ"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveTile(2)"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Плитка 3 — П</div>
+                            <div class="field"><label for="tile3Label">Подпись</label><input type="text" class="input" id="tile3Label" placeholder="ПЛАСТИНКИ"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveTile(3)"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Плитка 4 — Л</div>
+                            <div class="field"><label for="tile4Label">Подпись</label><input type="text" class="input" id="tile4Label" placeholder="ЛЮДИ"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveTile(4)"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                    </div>
+
+                    <!-- Карта -->
+                    <div class="page" id="page-map">
+                        <div class="page-header">
+                            <div class="page-kicker">Контент</div>
+                            <h1 class="page-title">Карта</h1>
+                            <p class="page-subtitle">Настройте Яндекс.Карту</p>
+                        </div>
+                        <div class="card pop-in">
+                            <div class="card-title"><i class="fas fa-map-marked-alt"></i> Ссылка на Яндекс.Карты</div>
+                            <p style="margin-bottom:1.4rem; font-weight:500; color: var(--ink-soft);">Вставьте ссылку на Яндекс.Карты.<br><code style="background:var(--wash); padding:3px 10px; border-radius:8px; border:1px solid var(--line);">https://yandex.ru/maps/-/CTh8qE7a</code></p>
+                            <div class="field"><label for="mapUrl">URL карты</label><input type="text" class="input" id="mapUrl" placeholder="https://yandex.ru/maps/-/..."></div>
+                            <button type="button" class="btn btn-primary" onclick="saveMap()"><i class="fas fa-save"></i> Сохранить карту</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-title">Или вставьте iframe-код</div>
+                            <p style="margin-bottom:1rem; font-weight:500; color: var(--ink-soft);">Яндекс.Карты → Поделиться → Код для сайта → скопируйте iframe</p>
+                            <div class="field"><label for="mapIframe">Iframe-код</label><textarea class="input" id="mapIframe" rows="4" placeholder='<iframe src="..."></iframe>'></textarea></div>
+                            <button type="button" class="btn btn-primary" onclick="saveMapIframe()"><i class="fas fa-save"></i> Сохранить iframe</button>
+                        </div>
+                    </div>
+
+                    <!-- Соцсети -->
+                    <div class="page" id="page-social">
+                        <div class="page-header">
+                            <div class="page-kicker">Контент</div>
+                            <h1 class="page-title">Социальные ссылки</h1>
+                            <p class="page-subtitle">Ссылки для клиентов</p>
+                        </div>
+                        <div class="card pop-in">
+                            <div class="card-title"><i class="fab fa-telegram"></i> Telegram</div>
+                            <div class="field"><label for="socialTelegram">Ссылка</label><input type="text" class="input" id="socialTelegram" placeholder="https://t.me/your_channel"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveSocial('telegram')"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-title"><i class="fab fa-whatsapp"></i> WhatsApp</div>
+                            <div class="field"><label for="socialWhatsapp">Ссылка</label><input type="text" class="input" id="socialWhatsapp" placeholder="https://wa.me/79999999999"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveSocial('whatsapp')"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                        <div class="card">
+                            <div class="card-title"><i class="fab fa-vk"></i> ВКонтакте</div>
+                            <div class="field"><label for="socialVk">Ссылка</label><input type="text" class="input" id="socialVk" placeholder="https://vk.com/your_group"></div>
+                            <button type="button" class="btn btn-primary" onclick="saveSocial('vk')"><i class="fas fa-save"></i> Сохранить</button>
+                        </div>
+                    </div>
+
+                    <!-- Настройки -->
+                    <div class="page" id="page-settings">
+                        <div class="page-header">
+                            <div class="page-kicker">Служебное</div>
+                            <h1 class="page-title">Настройки</h1>
+                            <p class="page-subtitle">Загрузка логотипа</p>
+                        </div>
+                        <div class="card pop-in">
+                            <div class="card-title"><i class="fas fa-image"></i> Логотип компании</div>
+                            <p style="margin-bottom:1.4rem; font-weight:500; color: var(--ink-soft);">Загрузите логотип PNG / SVG с прозрачным фоном.</p>
+                            <div class="logo-upload-area" onclick="document.getElementById('logoFileInput').click()">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p><strong>Нажмите для загрузки</strong></p>
+                                <small>PNG, SVG, JPG · до 2MB</small>
+                                <input type="file" id="logoFileInput" accept="image/png,image/svg+xml,image/jpeg,image/webp" aria-label="Выбор файла логотипа" style="display:none;" onchange="handleLogoUpload(event)">
+                            </div>
+                            <div id="logoPreviewContainer" style="display:none; text-align:center; margin-top:1.5rem; padding:1.5rem; background:var(--wash); border:1px solid var(--line); border-radius:20px;">
+                                <p style="font-weight:700; margin-bottom:0.4rem;">Предпросмотр:</p>
+                                <img id="logoPreview" class="logo-preview" src="" alt="Логотип">
+                                <div style="margin-top:1rem; display:flex; gap:0.8rem; justify-content:center;">
+                                    <button type="button" class="btn btn-primary" onclick="applyLogo()">Применить</button>
+                                    <button type="button" class="btn btn-ghost" onclick="resetLogo()">Сбросить</button>
+                                </div>
+                            </div>
+                            <div id="currentLogoInfo" class="mini-panel" style="display:none;">
+                                <img id="currentLogoImg" src="" alt="Текущий логотип">
+                                <div><div style="font-weight:800; font-size:1rem;">Текущий логотип</div><div style="font-size:0.82rem; font-weight:600; color:var(--ink-soft);">Загружен и применяется</div></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <aside class="dash-sidebar glass">
+                    <ul class="sidebar-menu" id="sidebarMenu"></ul>
+                    <div class="sidebar-user">
+                        <div class="sidebar-user-name" id="sidebarUserName">—</div>
+                        <div class="sidebar-user-email" id="sidebarUserEmail">—</div>
+                        <button type="button" class="sidebar-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка зёрен -->
+    <div class="modal-overlay" id="beanModal" role="dialog" aria-modal="true">
+        <div class="modal" style="max-width: 400px;">
+            <button type="button" class="modal-close" onclick="closeBeanModal()">×</button>
+            <h2 id="beanModalTitle">Операция</h2>
+            <p class="modal-subtitle" id="beanModalSubtitle">—</p>
+            <div class="field" style="margin-top:1.2rem;"><label for="beanAmount">Количество зёрен</label><input type="number" class="input" id="beanAmount" value="1" min="1" max="100"></div>
+            <button type="button" class="btn btn-primary btn-full" onclick="confirmBeanAction()">Подтвердить</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script>
+        'use strict';
+
+        // ===== КОНФИГ =====
+        // В dev (открыт как локальный файл) — localhost:3000, в проде — текущий домен.
+        const API = (window.location.protocol === 'file:' || ['localhost', '127.0.0.1'].includes(window.location.hostname))
+            ? 'http://localhost:3000/api'
+            : window.location.origin + '/api';
+
+        let token = null, user = null, scannedId = null, beanAction = '';
+        let qrInterval = null, qrCountdown = 60, cameraStream = null, camInterval = null, barcodeDetector = null;
+        let pendingLogoData = null;
+
+        const defaultTiles = [
+            { letter: 'П', label: 'ФИЛОСОФИЯ' },
+            { letter: 'И', label: 'ИСТОРИЯ' },
+            { letter: 'П', label: 'ПЛАСТИНКИ' },
+            { letter: 'Л', label: 'ЛЮДИ' }
+        ];
+
+        // ===== БЕЗОПАСНЫЙ РЕНДЕРИНГ (анти-XSS) =====
+        function escapeHTML(s) {
+            return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function safeUrl(u, fallback) {
+            try {
+                const url = new URL(u);
+                if (['https:', 'http:', 'tel:', 'mailto:'].includes(url.protocol)) return u;
+            } catch (e) { /* ignore */ }
+            return fallback;
+        }
+
+        async function api(path, opts = {}) {
+            const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {});
+            if (token) headers['Authorization'] = `Bearer ${token}`;
+            const res = await fetch(API + path, Object.assign({}, opts, { headers }));
+            let data = null;
+            try { data = await res.json(); } catch (e) { data = null; }
+            return { ok: res.ok, status: res.status, data };
+        }
+
+        function toast(msg, type = '') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast ' + type + ' show';
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.remove('show'), 3400);
+        }
+
+        // ===== ПЛИТКИ =====
+        function getTiles() {
+            const saved = localStorage.getItem('pipl_tiles');
+            try {
+                const parsed = saved ? JSON.parse(saved) : null;
+                if (Array.isArray(parsed) && parsed.length === 4) return parsed;
+            } catch (e) { /* reset to defaults */ }
+            return defaultTiles;
+        }
+
+        function loadTiles() {
+            const tiles = getTiles();
+            const grid = document.getElementById('heroGrid');
+            if (grid) {
+                grid.innerHTML = tiles.map(t =>
+                    `<div class="grid-block" style="--mx:${20 + (tiles.indexOf(t) * 20)}%"><div class="letter">${escapeHTML(t.letter)}</div><div class="label">${escapeHTML(t.label)}</div></div>`
+                ).join('');
+            }
+            return tiles;
+        }
+
+        function saveTile(num) {
+            const label = document.getElementById(`tile${num}Label`).value.trim();
+            if (!label) return toast('Введите подпись', 'error');
+            const tiles = getTiles();
+            tiles[num - 1].label = label.toUpperCase().slice(0, 24);
+            localStorage.setItem('pipl_tiles', JSON.stringify(tiles));
+            loadTiles();
+            toast(`Плитка ${num} обновлена!`, 'success');
+        }
+
+        function loadTileSettings() {
+            const tiles = getTiles();
+            tiles.forEach((t, i) => { const input = document.getElementById(`tile${i + 1}Label`); if (input) input.value = t.label; });
+        }
+
+        // ===== КАРТА =====
+        function loadMap() {
+            const container = document.getElementById('mapContainer');
+            if (!container) return;
+            const savedIframe = localStorage.getItem('pipl_map_iframe');
+            const savedUrl = localStorage.getItem('pipl_map_url');
+            if (savedIframe && /^<iframe[\s\S]*<\/iframe>$/i.test(savedIframe.trim())) {
+                container.innerHTML = savedIframe;
+            } else if (savedUrl) {
+                container.innerHTML = `<iframe src="${escapeHTML(savedUrl)}" width="100%" height="100%" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
+            } else {
+                container.innerHTML = `<iframe src="https://yandex.ru/map-widget/v1/?ll=142.750451%2C46.962052&z=16&l=map&pt=142.750451%2C46.962052%2Cpm2rdm" width="100%" height="100%" frameborder="0" allowfullscreen loading="lazy"></iframe>`;
+            }
+        }
+
+        function saveMap() {
+            const url = document.getElementById('mapUrl').value.trim();
+            if (!url || !/^https?:\/\//.test(url)) return toast('Введите корректный URL карты', 'error');
+            localStorage.setItem('pipl_map_url', url);
+            localStorage.removeItem('pipl_map_iframe');
+            loadMap();
+            toast('Карта сохранена!', 'success');
+        }
+
+        function saveMapIframe() {
+            const iframe = document.getElementById('mapIframe').value.trim();
+            if (!iframe || !/^<iframe[\s\S]*<\/iframe>$/i.test(iframe)) return toast('Вставьте корректный iframe-код', 'error');
+            localStorage.setItem('pipl_map_iframe', iframe);
+            localStorage.removeItem('pipl_map_url');
+            loadMap();
+            toast('Карта сохранена!', 'success');
+        }
+
+        function loadMapSettings() {
+            const urlInput = document.getElementById('mapUrl');
+            const iframeInput = document.getElementById('mapIframe');
+            if (urlInput) urlInput.value = localStorage.getItem('pipl_map_url') || '';
+            if (iframeInput) iframeInput.value = localStorage.getItem('pipl_map_iframe') || '';
+        }
+
+        // ===== ЛОГОТИП =====
+        function renderLogo(containerId, size = 'normal') {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            const savedLogo = localStorage.getItem('pipl_logo');
+            const h = size === 'small' ? 46 : 64;
+            if (savedLogo && /^data:image\//.test(savedLogo)) {
+                container.innerHTML = `<img src="${savedLogo}" class="logo-img" style="max-height:${h}px;" alt="ПИПЛ">`;
+            } else if (containerId === 'dashLogo') {
+                container.innerHTML = `<span class="logo-text on-light" style="font-size:1.25rem;">ПИПЛ</span>`;
+            } else {
+                container.innerHTML = `<span class="logo-text">ПИПЛ</span>`;
+            }
+        }
+
+        function handleLogoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!/^image\/(png|svg\+xml|jpeg|webp)$/.test(file.type)) return toast('Только изображения PNG, SVG, JPG, WEBP', 'error');
+            if (file.size > 2 * 1024 * 1024) return toast('Файл слишком большой (макс. 2MB)', 'error');
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                pendingLogoData = e.target.result;
+                document.getElementById('logoPreview').src = pendingLogoData;
+                document.getElementById('logoPreviewContainer').style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function applyLogo() {
+            if (!pendingLogoData) return;
+            localStorage.setItem('pipl_logo', pendingLogoData);
+            renderLogo('mainLogo');
+            renderLogo('dashLogo', 'small');
+            document.getElementById('logoPreviewContainer').style.display = 'none';
+            showCurrentLogo();
+            toast('Логотип сохранён!', 'success');
+            pendingLogoData = null;
+        }
+
+        function resetLogo() {
+            localStorage.removeItem('pipl_logo');
+            renderLogo('mainLogo');
+            renderLogo('dashLogo', 'small');
+            document.getElementById('logoPreviewContainer').style.display = 'none';
+            document.getElementById('currentLogoInfo').style.display = 'none';
+            toast('Логотип сброшен', 'success');
+        }
+
+        function showCurrentLogo() {
+            const savedLogo = localStorage.getItem('pipl_logo');
+            const info = document.getElementById('currentLogoInfo');
+            const img = document.getElementById('currentLogoImg');
+            if (savedLogo && info && img) {
+                img.src = savedLogo;
+                info.style.display = 'flex';
+            }
+        }
+
+        // ===== СОЦСЕТИ =====
+        const DEFAULT_SOCIALS = {
+            telegram: 'https://t.me/pipl_coffee',
+            whatsapp: 'https://wa.me/79999999999',
+            vk: 'https://vk.com/pipl_coffee'
+        };
+
+        function saveSocial(platform) {
+            const url = document.getElementById(`social${platform.charAt(0).toUpperCase() + platform.slice(1)}`).value.trim();
+            if (!url || !/^https?:\/\//.test(url)) return toast(`Введите корректную ссылку на ${platform}`, 'error');
+            localStorage.setItem(`social_${platform}`, url);
+            updateSocialLinks();
+            toast(`Ссылка на ${platform} сохранена!`, 'success');
+        }
+
+        function updateSocialLinks() {
+            const container = document.getElementById('socialLinks');
+            if (!container) return;
+            const tg = safeUrl(localStorage.getItem('social_telegram') || DEFAULT_SOCIALS.telegram, '#');
+            const wa = safeUrl(localStorage.getItem('social_whatsapp') || DEFAULT_SOCIALS.whatsapp, '#');
+            const vk = safeUrl(localStorage.getItem('social_vk') || DEFAULT_SOCIALS.vk, '#');
+            container.innerHTML =
+                `<a href="${escapeHTML(tg)}" target="_blank" rel="noopener" class="social-link"><i class="fab fa-telegram-plane"></i> Telegram</a>` +
+                `<a href="${escapeHTML(wa)}" target="_blank" rel="noopener" class="social-link"><i class="fab fa-whatsapp"></i> WhatsApp</a>` +
+                `<a href="${escapeHTML(vk)}" target="_blank" rel="noopener" class="social-link"><i class="fab fa-vk"></i> ВКонтакте</a>`;
+        }
+
+        function loadSocialSettings() {
+            const telInput = document.getElementById('socialTelegram');
+            const waInput = document.getElementById('socialWhatsapp');
+            const vkInput = document.getElementById('socialVk');
+            if (telInput) telInput.value = localStorage.getItem('social_telegram') || '';
+            if (waInput) waInput.value = localStorage.getItem('social_whatsapp') || '';
+            if (vkInput) vkInput.value = localStorage.getItem('social_vk') || '';
+        }
+
+        // ===== АВТОРИЗАЦИЯ =====
+        function openModal() {
+            document.getElementById('loginModal').classList.add('active');
+            const savedLogo = localStorage.getItem('pipl_logo');
+            const modalLogo = document.getElementById('modalLogo');
+            if (savedLogo && /^data:image\//.test(savedLogo)) {
+                modalLogo.src = savedLogo;
+                modalLogo.classList.remove('hidden');
+            } else {
+                modalLogo.classList.add('hidden');
+            }
+        }
+
+        function closeModal() {
+            stopCamera();
+            document.getElementById('loginModal').classList.remove('active');
+        }
+
+        function switchClientMethod(method, btn) {
+            document.querySelectorAll('.method-tab').forEach(t => t.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            document.getElementById('tgLogin').classList.toggle('hidden', method !== 'tg');
+            document.getElementById('emailLogin').classList.toggle('hidden', method !== 'email');
+        }
+
+        function backToTgStep1() {
+            document.getElementById('tgStep2').classList.add('hidden');
+            document.getElementById('tgStep1').classList.remove('hidden');
+        }
+
+        async function requestTgCode() {
+            const username = document.getElementById('tgUsername').value.trim();
+            if (!username || !/^@?[a-zA-Z0-9_]{4,32}$/.test(username)) return toast('Укажите корректный ник в Telegram', 'error');
+            const btn = document.querySelector('#tgStep1 .btn');
+            btn.disabled = true;
+            try {
+                const { ok, data } = await api('/auth/tg-request', { method: 'POST', body: JSON.stringify({ username }) });
+                if (!ok) {
+                    document.querySelector('#tgStep1 .hint').style.display = data && data.needStart ? 'inline' : 'inline';
+                    return toast(data?.error || 'Не удалось отправить пароль', 'error');
+                }
+                document.getElementById('tgUserDisplay').textContent = '@' + (data.username || username.replace(/^@/, ''));
+                document.getElementById('tgCode').value = '';
+                document.getElementById('tgStep1').classList.add('hidden');
+                document.getElementById('tgStep2').classList.remove('hidden');
+                setTimeout(() => document.getElementById('tgCode').focus(), 50);
+                toast('Пароль отправлен в Telegram!', 'success');
+            } catch (e) {
+                toast('Ошибка соединения с сервером', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function verifyTgCode() {
+            const username = document.getElementById('tgUsername').value.trim().replace(/^@/, '');
+            const code = document.getElementById('tgCode').value.trim();
+            if (!/^\d{6}$/.test(code)) return toast('Введите 6 цифр из Telegram', 'error');
+            try {
+                const { ok, data } = await api('/auth/tg-verify', { method: 'POST', body: JSON.stringify({ username, code }) });
+                if (!ok) return toast(data?.error || 'Неверный пароль', 'error');
+                token = data.token;
+                user = data.user;
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                closeModal();
+                enterDashboard();
+            } catch (e) {
+                toast('Ошибка соединения с сервером', 'error');
+            }
+        }
+
+        async function sendClientCode() {
+            const email = document.getElementById('clientEmail').value.trim().toLowerCase();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/.test(email)) return toast('Введите корректный email', 'error');
+            const btn = document.querySelector('#clientStep1 .btn');
+            btn.disabled = true;
+            try {
+                const { ok, data } = await api('/auth/register', { method: 'POST', body: JSON.stringify({ email }) });
+                if (!ok) return toast(data?.error || 'Ошибка', 'error');
+                document.getElementById('emailDisplay').textContent = email;
+                document.getElementById('clientStep1').classList.add('hidden');
+                document.getElementById('clientStep2').classList.remove('hidden');
+                document.querySelectorAll('.code-input').forEach((input, idx) => input.value = '123456'[idx]);
+                document.querySelectorAll('.code-input')[0].focus();
+                toast('Код отправлен!', 'success');
+            } catch (e) {
+                toast('Ошибка соединения с сервером', 'error');
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function verifyClientCode() {
+            const email = document.getElementById('clientEmail').value.trim().toLowerCase();
+            const code = Array.from(document.querySelectorAll('.code-input')).map(i => i.value).join('');
+            if (code.length !== 6 || !/^\d{6}$/.test(code)) return toast('Введите 6 цифр', 'error');
+            try {
+                const { ok, data } = await api('/auth/verify', { method: 'POST', body: JSON.stringify({ email, code }) });
+                if (!ok) return toast(data?.error || 'Неверный код', 'error');
+                token = data.token;
+                user = data.user;
+                localStorage.setItem('token', token);
+                localStorage.setItem('user', JSON.stringify(user));
+                closeModal();
+                enterDashboard();
+            } catch (e) {
+                toast('Ошибка соединения с сервером', 'error');
+            }
+        }
+
+        // ===== ДАШБОРД =====
+        function enterDashboard() {
+            document.getElementById('landing').style.display = 'none';
+            document.getElementById('dashboard').classList.add('active');
+            window.scrollTo(0, 0);
+            buildSidebar();
+            renderLogo('dashLogo', 'small');
+            document.getElementById('sidebarUserName').textContent = user.name || user.login || 'Гость';
+            document.getElementById('sidebarUserEmail').textContent = user.email || user.login || '';
+            if (user.role === 'client') {
+                showPage('qr');
+            } else {
+                showPage('scan');
+                if (user.role === 'admin' || user.role === 'owner') {
+                    loadSocialSettings();
+                    loadTileSettings();
+                    loadMapSettings();
+                }
+            }
+        }
+
+        function buildSidebar() {
+            const items = user.role === 'client'
+                ? [['qr', 'fa-qrcode', 'QR-код'], ['profile', 'fa-user', 'Профиль']]
+                : [['scan', 'fa-camera', 'Сканер'], ['clients', 'fa-users', 'Клиенты'], ['banners', 'fa-image', 'Баннеры'], ['tiles', 'fa-th-large', 'Плитки'], ['map', 'fa-map', 'Карта'], ['social', 'fa-share-alt', 'Соцсети'], ['settings', 'fa-cog', 'Настройки']];
+            document.getElementById('sidebarMenu').innerHTML = items.map(([id, icon, label]) =>
+                `<li><a href="#" data-page="${id}" onclick="showPage('${id}');return false;"><i class="fas ${icon}"></i> ${label}</a></li>`
+            ).join('');
+        }
+
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            const page = document.getElementById('page-' + id);
+            if (page) page.classList.add('active');
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.toggle('active', a.dataset.page === id));
+            if (id === 'profile') loadProfile();
+            if (id === 'clients') loadClients();
+            if (id === 'qr') startQRRefresh();
+            if (id === 'banners') loadBanners();
+            if (id === 'tiles') loadTileSettings();
+            if (id === 'map') loadMapSettings();
+            if (id === 'social') loadSocialSettings();
+            if (id === 'settings') showCurrentLogo();
+        }
+
+        // ===== ПРОФИЛЬ И QR =====
+        async function loadProfile() {
+            try {
+                const { ok, data } = await api('/client/profile');
+                if (!ok || !data?.user) return;
+                const beans = data.user.beans_count;
+                document.getElementById('beansValue').textContent = `${beans} / 6`;
+                document.getElementById('beansProgress').style.width = Math.min(beans / 6 * 100, 100) + '%';
+                document.getElementById('beansHint').textContent = beans >= 6 ? '🎉 У вас достаточно зёрен! Забирайте бесплатный кофе' : `Ещё ${6 - beans} до бесплатного напитка`;
+
+                const typeMap = {
+                    'admin_add': { label: 'Начислено бариста', cls: 'badge-success' },
+                    'admin_deduct': { label: 'Списано бариста', cls: 'badge-error' },
+                    'admin_redeem': { label: 'Бесплатный напиток', cls: 'badge-amber' },
+                    'reward_redeem': { label: 'Бесплатный напиток', cls: 'badge-amber' },
+                    'game_reward': { label: 'Бонус за игру', cls: 'badge-info' }
+                };
+
+                const rows = (data.transactions && data.transactions.length)
+                    ? data.transactions.map(t => {
+                        const meta = typeMap[t.type] || { label: t.type || 'Операция', cls: 'badge-info' };
+                        const sign = t.beans_change > 0 ? '+' : '';
+                        return `<tr><td>${new Date(t.created_at).toLocaleDateString('ru-RU')}</td><td>${escapeHTML(t.description || meta.label)}</td><td><span class="badge ${t.beans_change > 0 ? 'badge-success' : 'badge-error'}">${sign}${t.beans_change}</span></td></tr>`;
+                    }).join('')
+                    : '<tr><td colspan="3" style="text-align:center; opacity:0.6;">Нет операций</td></tr>';
+                document.querySelector('#transactionsTable tbody').innerHTML = rows;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function loadQR() {
+            try {
+                const { ok, data } = await api('/client/qr');
+                if (!ok || !data?.qrCode) return;
+                document.getElementById('qrImage').src = data.qrCode;
+                qrCountdown = data.expiresIn || 60;
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function startQRRefresh() {
+            if (qrInterval) clearInterval(qrInterval);
+            loadQR();
+            qrInterval = setInterval(() => {
+                qrCountdown--;
+                if (qrCountdown < 0) qrCountdown = 0;
+                document.getElementById('qrCountdown').textContent = qrCountdown;
+                document.getElementById('qrBar').style.width = (qrCountdown / 60 * 100) + '%';
+                if (qrCountdown <= 0) loadQR();
+            }, 1000);
+        }
+
+        // ===== СКАНЕР =====
+        function toggleCamera() {
+            if (cameraStream) { stopCamera(); return; }
+            if (!navigator.mediaDevices || !('BarcodeDetector' in window)) {
+                return toast('Сканер камеры недоступен в этом браузере — используйте ручной ввод', 'error');
+            }
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                .then(async (stream) => {
+                    cameraStream = stream;
+                    const video = document.getElementById('scanVideo');
+                    video.srcObject = stream;
+                    await video.play();
+                    video.style.display = 'block';
+                    document.getElementById('scanFrame').style.display = 'block';
+                    document.getElementById('btnToggleCam').innerHTML = '<i class="fas fa-stop"></i> Остановить камеру';
+                    try { barcodeDetector = new BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { barcodeDetector = null; }
+                    camInterval = setInterval(scanFrameCamera, 700);
+                    toast('Наведите камеру на QR-код клиента', 'success');
+                })
+                .catch(() => toast('Нет доступа к камере или она занята', 'error'));
+        }
+
+        async function scanFrameCamera() {
+            const video = document.getElementById('scanVideo');
+            if (!video || video.readyState < 2 || !barcodeDetector) return;
+            try {
+                const codes = await barcodeDetector.detect(video);
+                if (codes && codes.length > 0) {
+                    const value = codes[0].rawValue;
+                    if (value) {
+                        document.getElementById('qrDataInput').value = value;
+                        stopCamera();
+                        scanQR();
+                    }
+                }
+            } catch (e) { /* frame skipped */ }
+        }
+
+        function stopCamera() {
+            if (camInterval) { clearInterval(camInterval); camInterval = null; }
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null;
+            }
+            const video = document.getElementById('scanVideo');
+            if (video) { video.style.display = 'none'; video.srcObject = null; }
+            const frame = document.getElementById('scanFrame');
+            if (frame) frame.style.display = 'none';
+            const btn = document.getElementById('btnToggleCam');
+            if (btn) btn.innerHTML = '<i class="fas fa-camera"></i> Сканировать камерой';
+        }
+
+        async function scanQR() {
+            const data = document.getElementById('qrDataInput').value.trim();
+            if (!data) return toast('Вставьте данные QR-кода', 'error');
+            try {
+                const { ok, data: d } = await api('/admin/scan', { method: 'POST', body: JSON.stringify({ qrData: data }) });
+                if (!ok) return toast(d?.error || 'QR отклонён', 'error');
+                scannedId = d.user.id;
+                document.getElementById('scannedName').textContent = d.user.name || 'Без имени';
+                document.getElementById('scannedEmail').textContent = d.user.email;
+                document.getElementById('scannedBeans').textContent = d.user.beans_count;
+                document.getElementById('btnRedeem').disabled = d.user.beans_count < 6;
+                document.getElementById('scannedResult').classList.remove('hidden');
+                toast('Клиент найден', 'success');
+            } catch (e) {
+                toast('Ошибка соединения', 'error');
+            }
+        }
+
+        async function adminRedeem() {
+            if (!scannedId) return;
+            if (!confirm('Списать 6 зёрен за бесплатный напиток?')) return;
+            try {
+                const { ok, data } = await api('/admin/redeem', { method: 'POST', body: JSON.stringify({ userId: scannedId }) });
+                if (!ok) return toast(data?.error || 'Ошибка', 'error');
+                toast(data?.message || 'Готово!', 'success');
+                scanQR();
+            } catch (e) {
+                toast('Ошибка соединения', 'error');
+            }
+        }
+
+        function openBeanModal(action) {
+            beanAction = action;
+            document.getElementById('beanModalTitle').textContent = action === 'add' ? 'Начислить зёрна' : 'Списать зёрна';
+            document.getElementById('beanModalSubtitle').textContent = `Клиент: ${document.getElementById('scannedName').textContent}`;
+            document.getElementById('beanModal').classList.add('active');
+        }
+
+        function closeBeanModal() { document.getElementById('beanModal').classList.remove('active'); }
+
+        async function confirmBeanAction() {
+            const beans = parseInt(document.getElementById('beanAmount').value, 10);
+            if (!beans || beans < 1 || beans > 100) return toast('Введите число от 1 до 100', 'error');
+            try {
+                const { ok, data } = await api(`/admin/beans/${beanAction}`, { method: 'POST', body: JSON.stringify({ userId: scannedId, beans, description: 'Операция админа' }) });
+                if (!ok) return toast(data?.error || 'Ошибка', 'error');
+                toast(data?.message || 'Готово!', 'success');
+                closeBeanModal();
+                scanQR();
+            } catch (e) {
+                toast('Ошибка соединения', 'error');
+            }
+        }
+
+        // ===== КЛИЕНТЫ =====
+        async function loadClients() {
+            try {
+                const { ok, data } = await api('/admin/clients');
+                const body = document.querySelector('#clientsTable tbody');
+                if (!ok || !Array.isArray(data)) return;
+                body.innerHTML = data.map(c =>
+                    `<tr><td>${escapeHTML(c.name || 'Без имени')}</td><td>${escapeHTML(c.email || '—')}</td><td><span class="badge ${c.beans_count >= 6 ? 'badge-success' : 'badge-info'}">${c.beans_count}</span></td><td>${escapeHTML(c.total_spent)} ₽</td></tr>`
+                ).join('') || '<tr><td colspan="4" style="text-align:center; opacity:0.6;">Нет клиентов</td></tr>';
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // ===== БАННЕРЫ =====
+        function bannerImageUrl(path) {
+            if (!path) return '';
+            return /^(https?:)?\/\//.test(path) ? path : `${API.replace('/api', '')}${path}`;
+        }
+
+        async function loadBanners() {
+            try {
+                const res = await fetch(API + '/banners');
+                const banners = await res.json();
+                if (!Array.isArray(banners)) return;
+                const grid1 = document.getElementById('gallery').children[0];
+                const grid2 = document.getElementById('gallery').children[1];
+
+                if (banners.length > 0 && banners[0]) {
+                    const imgUrl = bannerImageUrl(banners[0].image_url);
+                    const t1 = escapeHTML(banners[0].title || 'Акция 1');
+                    grid1.innerHTML = imgUrl
+                        ? `<img src="${escapeHTML(imgUrl)}" alt="${t1}" loading="lazy" onerror="this.remove();"><div class="tag">${t1}</div>`
+                        : `<div class="gallery-placeholder"><i class="fas fa-record-vinyl"></i><span style="font-size:0.95rem; font-weight:700;">${t1}</span></div>`;
+                }
+                if (banners.length > 1 && banners[1]) {
+                    const imgUrl = bannerImageUrl(banners[1].image_url);
+                    const t2 = escapeHTML(banners[1].title || 'Акция 2');
+                    grid2.innerHTML = imgUrl
+                        ? `<img src="${escapeHTML(imgUrl)}" alt="${t2}" loading="lazy" onerror="this.remove();"><div class="tag">${t2}</div>`
+                        : `<div class="gallery-placeholder"><i class="fas fa-mug-hot"></i><span style="font-size:0.95rem; font-weight:700;">${t2}</span></div>`;
+                }
+
+                const b1u = document.getElementById('banner1Url');
+                const b1t = document.getElementById('banner1Title');
+                const b2u = document.getElementById('banner2Url');
+                const b2t = document.getElementById('banner2Title');
+                if (banners[0]) { if (b1u) b1u.value = banners[0].image_url || ''; if (b1t) b1t.value = banners[0].title || ''; }
+                if (banners[1]) { if (b2u) b2u.value = banners[1].image_url || ''; if (b2t) b2t.value = banners[1].title || ''; }
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function saveBanner(num) {
+            const url = document.getElementById(`banner${num}Url`).value.trim();
+            const title = document.getElementById(`banner${num}Title`).value.trim().slice(0, 255);
+            if (!url) return toast('Введите URL изображения', 'error');
+            try {
+                const { ok, data } = await api('/admin/banners', { method: 'POST', body: JSON.stringify({ image_url: url, title, position: num }) });
+                if (!ok) return toast(data?.error || 'Ошибка сохранения', 'error');
+                toast('Баннер сохранён', 'success');
+                loadBanners();
+            } catch (e) {
+                toast('Ошибка соединения', 'error');
+            }
+        }
+
+        function logout() {
+            stopCamera();
+            localStorage.clear();
+            location.reload();
+        }
+
+        // ===== КОД ВВОДА (поле по 1 цифре) =====
+        const codeInputs = document.querySelectorAll('.code-input');
+        codeInputs.forEach((input, i, inputs) => {
+            input.addEventListener('input', e => {
+                let val = e.target.value.replace(/\D/g, '');
+                if (val.length > 1) val = val[val.length - 1];
+                e.target.value = val;
+                if (val && i < inputs.length - 1) setTimeout(() => inputs[i + 1].focus(), 30);
+            });
+            input.addEventListener('keydown', e => {
+                if (e.key === 'Backspace' && !input.value && i > 0) setTimeout(() => inputs[i - 1].focus(), 30);
+                if (e.key === 'Enter') verifyClientCode();
+            });
+            input.addEventListener('paste', e => {
+                e.preventDefault();
+                const digits = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '').slice(0, 6);
+                if (!digits) return;
+                digits.split('').forEach((d, idx) => { if (inputs[idx]) inputs[idx].value = d; });
+                const nextEmpty = Array.from(inputs).findIndex(inp => !inp.value);
+                inputs[nextEmpty >= 0 ? nextEmpty : inputs.length - 1].focus();
+            });
+            input.addEventListener('focus', () => input.select());
+        });
+
+        // ===== МОДАЛКИ: клик по фону закрывает =====
+        document.querySelectorAll('.modal-overlay').forEach(m => {
+            m.addEventListener('mousedown', e => { if (e.target === m) m.classList.remove('active'); });
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') { document.querySelectorAll('.modal-overlay.active').forEach(m => m.classList.remove('active')); } });
+
+        // (вход персонала перенесён на отдельную страницу /personals)
+        const tgCodeInput = document.getElementById('tgCode');
+        if (tgCodeInput) tgCodeInput.addEventListener('keydown', e => { if (e.key === 'Enter') verifyTgCode(); });
+
+        window.addEventListener('beforeunload', stopCamera);
+
+        // ===== ХЕДЕР: тень при скролле =====
+        const siteHeader = document.getElementById('siteHeader');
+        window.addEventListener('scroll', () => {
+            if (siteHeader) siteHeader.classList.toggle('scrolled', window.scrollY > 24);
+        }, { passive: true });
+
+        // ===== ПАРАЛЛАКС ЗЁРЕН =====
+        const beansLayer = document.getElementById('beansLayer');
+        if (beansLayer) {
+            window.addEventListener('scroll', () => {
+                beansLayer.style.translate = '0 ' + (window.scrollY * -0.05) + 'px';
+            }, { passive: true });
+        }
+
+        // ===== ПОЯВЛЕНИЕ ПРИ СКРОЛЛЕ =====
+        const revealObserver = new IntersectionObserver(entries => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('seen');
+                    revealObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.12 });
+
+        document.querySelectorAll('[data-reveal]').forEach(el => revealObserver.observe(el));
+
+        // ===== СЧЁТЧИКИ СТАТИСТИКИ (count-up при появлении) =====
+        function animateNumbers() {
+            document.querySelectorAll('.stat-item .number').forEach(el => {
+                const raw = el.textContent;
+                const m = raw.match(/^([^0-9]*)(\d+)(.*)$/);
+                if (!m) return;
+                const prefix = m[1], target = parseInt(m[2], 10), suffix = m[3];
+                const dur = 1400, t0 = performance.now();
+                function tick(now) {
+                    const k = Math.min((now - t0) / dur, 1);
+                    const eased = 1 - Math.pow(1 - k, 3);
+                    el.textContent = prefix + Math.round(target * eased) + suffix;
+                    if (k < 1) requestAnimationFrame(tick);
+                }
+                requestAnimationFrame(tick);
+            });
+        }
+        const statsObs = new IntersectionObserver(entries => {
+            entries.forEach(entry => { if (entry.isIntersecting) { animateNumbers(); statsObs.unobserve(entry.target); } });
+        }, { threshold: 0.3 });
+        document.querySelectorAll('.stats').forEach(el => statsObs.observe(el));
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        window.addEventListener('load', () => {
+            renderLogo('mainLogo');
+            loadTiles();
+            loadMap();
+            loadBanners();
+            updateSocialLinks();
+            const t = localStorage.getItem('token');
+            const u = localStorage.getItem('user');
+            if (t && u) {
+                try {
+                    token = t;
+                    user = JSON.parse(u);
+                    if (user && user.role) enterDashboard();
+                } catch (e) {
+                    localStorage.clear();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
