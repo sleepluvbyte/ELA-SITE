@@ -181,6 +181,9 @@ app.post('/api/admin/beans/add', authenticateToken, requireRole('admin', 'owner'
 app.post('/api/admin/beans/deduct', authenticateToken, requireRole('admin', 'owner'), adminController.deductBeans);
 app.get('/api/admin/clients', authenticateToken, requireRole('admin', 'owner'), adminController.getClients);
 app.post('/api/admin/news', authenticateToken, requireRole('admin', 'owner'), adminController.createNews);
+app.get(/api/admin/news, authenticateToken, requireRole(admin,owner), adminController.getAllNews);
+app.put(/api/admin/news/:id, authenticateToken, requireRole(admin,owner), adminController.updateNews);
+app.delete(/api/admin/news/:id, authenticateToken, requireRole(admin,owner), adminController.deleteNews);
 
 // Owner routes
 app.get('/api/owner/dashboard', authenticateToken, requireRole('owner'), ownerController.getDashboard);

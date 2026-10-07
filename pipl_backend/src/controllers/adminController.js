@@ -204,3 +204,37 @@ export async function createNews(req, res) {
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 }
+export async function getAllNews(req, res) {
+  try {
+    const { page = 1, limit = 50 } = req.query;
+    const offset = (page - 1) * limit;
+    const result = await db.query(
+      SELECT n.*, u.name as author_name FROM news n LEFT JOIN users u ON n.created_by = u.id ORDER BY n.created_at DESC LIMIT  OFFSET ,
+      [limit, offset]
+    );
+    const total = await db.query('SELECT COUNT(*) FROM news');
+    res.json({ news: result.rows, pagination: { page: parseInt(page), limit: parseInt(limit), total: parseInt(total.rows[0].count) } });
+  } catch (error) { console.error(error); res.status(500).json({ error: 'Ошибка сервера' }); }
+}
+export async function updateNews(req, res) {
+  try {
+    const { id } = req.params;
+    const title = cleanString(req.body.title, 255);
+    const content = cleanString(req.body.content, 5000);
+    const image_url = cleanString(req.body.image_url, 1000);
+    if (!title || !content) return res.status(400).json({ error: 'Заголовок и содержимое обязательны' });
+    const result = await db.query(
+      UPDATE news SET title=, content=, image_url=, updated_at=NOW() WHERE id= RETURNING *,
+      [title, content, image_url || null, id]
+    );
+    if (result.rows.length===0) return res.status(404).json({ error: 'Не найдено' });
+    res.json(result.rows[0]);
+  } catch (error) { console.error(error); res.status(500).json({ error: 'Ошибка сервера' }); }
+}
+export async function deleteNews(req, res) {
+  try {
+    const { id } = req.params;
+    await db.query('DELETE FROM news WHERE id=', [id]);
+    res.json({ success: true });
+  } catch (error) { console.error(error); res.status(500).json({ error: 'Ошибка сервера' }); }
+}
