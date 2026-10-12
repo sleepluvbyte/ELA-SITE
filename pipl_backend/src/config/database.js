@@ -97,6 +97,32 @@ export async function initDatabase() {
 
     ALTER TABLE users ADD COLUMN IF NOT EXISTS telegram_id BIGINT UNIQUE;
     ALTER TABLE users ADD COLUMN IF NOT EXISTS tg_username VARCHAR(64) UNIQUE;
+
+    -- Вход клиента по номеру телефона: сайт шлёт deep-link
+    -- t.me/<bot>?start=<phone>, бот привязывает номер к чату.
+    -- username остаётся для старого входа по нику и поэтому становится
+    -- необязательным; NULL в UNIQUE-колонке в PostgreSQL не конфликтует.
+    ALTER TABLE tg_chats ALTER COLUMN username DROP NOT NULL;
+    ALTER TABLE tg_chats ADD COLUMN IF NOT EXISTS phone VARCHAR(20);
+    CREATE UNIQUE INDEX IF NOT EXISTS tg_chats_phone_uniq ON tg_chats (phone);
+    ALTER TABLE tg_login_codes ALTER COLUMN username DROP NOT NULL;
+    ALTER TABLE tg_login_codes ADD COLUMN IF NOT EXISTS phone VARCHAR(20);
+    CREATE INDEX IF NOT EXISTS tg_login_codes_phone_idx ON tg_login_codes (phone);
+
+    -- Афиша: события кофейни. Владелец редактирует из своего кабинета,
+    -- публичная часть показывает только visible = true.
+    CREATE TABLE IF NOT EXISTS events (
+      id SERIAL PRIMARY KEY,
+      title VARCHAR(255) NOT NULL,
+      description TEXT,
+      day VARCHAR(10),
+      month VARCHAR(20),
+      weekday VARCHAR(20),
+      event_date DATE,
+      visible BOOLEAN NOT NULL DEFAULT true,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
   `);
 
   console.log('✅ Database initialized');

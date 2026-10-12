@@ -1,0 +1,20 @@
+# dependencies
+node_modules/
+
+# secrets — НЕ коммитить (лежат только на сервере)
+pipl_backend/.env
+pipl_backend/.env.bak
+pipl_backend/.env.bak.*
+frontend/.env
+
+# runtime / uploads
+pipl_backend/uploads/
+
+# python
+__pycache__/
+*.pyc
+
+# logs / os
+*.log
+.DS_Store
+Thumbs.db

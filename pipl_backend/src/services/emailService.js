@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
+import { REWARD_THRESHOLD } from '../config/constants.js';
 
 dotenv.config();
 
@@ -75,7 +76,7 @@ export async function sendWelcomeEmail(email, name) {
             <ul style="color: #666; line-height: 1.8;">
               <li>☕ Покупайте напитки и получайте зёрна</li>
               <li>🌱 1 покупка = 1 зерно</li>
-              <li>🎁 Соберите 7 зёрен = бесплатный напиток</li>
+              <li>🎁 Соберите ${REWARD_THRESHOLD} зёрен = бесплатный напиток</li>
             </ul>
           </div>
           <p style="color: #999; font-size: 14px;">

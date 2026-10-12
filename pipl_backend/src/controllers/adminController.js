@@ -1,6 +1,7 @@
 import { db } from '../config/database.js';
 import crypto from 'crypto';
 import { toPositiveInt, toUserId, cleanString } from '../utils/validate.js';
+import { REWARD_THRESHOLD } from '../config/constants.js';
 
 export async function scanQRCode(req, res) {
   try {
@@ -75,24 +76,24 @@ export async function redeemByAdmin(req, res) {
       return res.status(404).json({ error: 'Клиент не найден' });
     }
     
-    if (user.rows[0].beans_count < 7) {
+    if (user.rows[0].beans_count < REWARD_THRESHOLD) {
       return res.status(400).json({ 
-        error: `Недостаточно зёрен. У клиента: ${user.rows[0].beans_count}` 
+        error: `Недостаточно зёрен. Нужно ${REWARD_THRESHOLD}, у клиента: ${user.rows[0].beans_count}` 
       });
     }
     
     await db.query(
-      'UPDATE users SET beans_count = beans_count - 7 WHERE id = $1',
-      [userId]
+      'UPDATE users SET beans_count = beans_count - $1 WHERE id = $2',
+      [REWARD_THRESHOLD, userId]
     );
     
     await db.query(
       `INSERT INTO transactions (user_id, type, beans_change, description, created_by) 
-       VALUES ($1, 'admin_redeem', -7, 'Бесплатный напиток (через админа)', $2)`,
-      [userId, adminId]
+       VALUES ($1, 'admin_redeem', $2, 'Бесплатный напиток (через админа)', $3)`,
+      [userId, -REWARD_THRESHOLD, adminId]
     );
     
-    res.json({ success: true, message: '✅ 7 зёрен списано. Клиент получает бесплатный напиток!' });
+    res.json({ success: true, message: `✅ ${REWARD_THRESHOLD} зёрен списано. Клиент получает бесплатный напиток!` });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Ошибка сервера' });
@@ -204,37 +205,44 @@ export async function createNews(req, res) {
     res.status(500).json({ error: 'Ошибка сервера' });
   }
 }
-export async function getAllNews(req, res) {
-  try {
-    const { page = 1, limit = 50 } = req.query;
-    const offset = (page - 1) * limit;
-    const result = await db.query(
-      SELECT n.*, u.name as author_name FROM news n LEFT JOIN users u ON n.created_by = u.id ORDER BY n.created_at DESC LIMIT  OFFSET ,
-      [limit, offset]
-    );
-    const total = await db.query('SELECT COUNT(*) FROM news');
-    res.json({ news: result.rows, pagination: { page: parseInt(page), limit: parseInt(limit), total: parseInt(total.rows[0].count) } });
-  } catch (error) { console.error(error); res.status(500).json({ error: 'Ошибка сервера' }); }
-}
+
 export async function updateNews(req, res) {
   try {
-    const { id } = req.params;
+    const id = toPositiveInt(req.params.id);
+    if (id === null) return res.status(400).json({ error: 'Некорректный ID новости' });
+
     const title = cleanString(req.body.title, 255);
     const content = cleanString(req.body.content, 5000);
     const image_url = cleanString(req.body.image_url, 1000);
-    if (!title || !content) return res.status(400).json({ error: 'Заголовок и содержимое обязательны' });
+    if (!title || !content) {
+      return res.status(400).json({ error: 'Заголовок и содержимое обязательны' });
+    }
+
     const result = await db.query(
-      UPDATE news SET title=, content=, image_url=, updated_at=NOW() WHERE id= RETURNING *,
+      `UPDATE news SET title = $1, content = $2, image_url = $3
+       WHERE id = $4
+       RETURNING *`,
       [title, content, image_url || null, id]
     );
-    if (result.rows.length===0) return res.status(404).json({ error: 'Не найдено' });
+
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Новость не найдена' });
     res.json(result.rows[0]);
-  } catch (error) { console.error(error); res.status(500).json({ error: 'Ошибка сервера' }); }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
 }
+
 export async function deleteNews(req, res) {
   try {
-    const { id } = req.params;
-    await db.query('DELETE FROM news WHERE id=', [id]);
+    const id = toPositiveInt(req.params.id);
+    if (id === null) return res.status(400).json({ error: 'Некорректный ID новости' });
+
+    const result = await db.query('DELETE FROM news WHERE id = $1 RETURNING id', [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Новость не найдена' });
     res.json({ success: true });
-  } catch (error) { console.error(error); res.status(500).json({ error: 'Ошибка сервера' }); }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
 }

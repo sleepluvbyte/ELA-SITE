@@ -16,7 +16,10 @@ import * as clientController from './controllers/clientController.js';
 import * as adminController from './controllers/adminController.js';
 import * as ownerController from './controllers/ownerController.js';
 import * as bannerController from './controllers/bannerController.js';
-import { setWebhook } from './services/telegramBot.js';
+import * as eventController from './controllers/eventController.js';
+import * as sellerController from './controllers/sellerController.js';
+import { setWebhook, botStartPrefix } from './services/telegramBot.js';
+import { REWARD_THRESHOLD } from './config/constants.js';
 
 dotenv.config();
 
@@ -47,7 +50,7 @@ if (isProd) {
       if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
       return cb(Object.assign(new Error('Not allowed by CORS'), { status: 403, code: 'CORS_DENIED' }));
     },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     maxAge: 86400
   }));
@@ -98,6 +101,16 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth', authLimiter);
 
+// Публичные константы для фронтенда: сколько зёрен до награды и куда вести
+// бота для привязки номера. Раньше они были продублированы в HTML и
+// разъезжались с бэкендом (6 в одном месте, 7 в другом).
+app.get('/api/meta', (req, res) => {
+  res.json({
+    rewardThreshold: REWARD_THRESHOLD,
+    botStartPrefix: botStartPrefix(),
+  });
+});
+
 // Защита от перебора пароля — по конкретной учётке, а не по IP.
 // Один сотрудник не блокирует весь офис, но подобрать пароль не получится.
 const loginKey = (req) => {
@@ -134,6 +147,33 @@ const emailLimiter = rateLimit({
 });
 
 const emailIpLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 час
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: ipKey,
+  message: { error: 'Слишком много запросов, попробуйте позже' }
+});
+
+// Лимит на выдачу Telegram-кодов. Как и с email, ключ — сам номер, а не IP:
+// гости кофейни выходят через один адрес, и лимит по IP заблокировал бы
+// вход всем остальным. Общий IP-потолок ниже страхует от флуда с рандомных
+// номеров с одного хоста.
+const tgPhoneKey = (req) => {
+  const phone = typeof req.body?.phone === 'string' ? req.body.phone.replace(/\D/g, '') : '';
+  return phone || ipKey(req);
+};
+
+const tgRequestLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: tgPhoneKey,
+  message: { error: 'Слишком много запросов кода, попробуйте через час' }
+});
+
+const tgRequestIpLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 20,
   standardHeaders: true,
@@ -143,9 +183,12 @@ const emailIpLimiter = rateLimit({
 });
 
 app.post('/api/auth/register', emailLimiter, emailIpLimiter, authController.registerClient);
+// Синоним /api/auth/request из ТЗ: запросить код на email.
+app.post('/api/auth/request', emailLimiter, emailIpLimiter, authController.registerClient);
 
 // Auth routes
 app.post('/api/auth/verify', authController.verifyCode);
+app.get('/api/auth/me', authenticateToken, authController.me);
 // Успешный вход снимает счётчик неудач: человек, который пару раз промахнулся
 // кириллицей в раскладке, не должен копить блокировку весь рабочий день.
 // skipSuccessfulRequests лишь не увеличивает счётчик, но и не стирает
@@ -162,7 +205,7 @@ function loginWithReset(req, res, next) {
 
 app.post('/api/auth/login', loginLimiter, loginWithReset);
 app.post('/api/auth/telegram', telegramController.loginViaTelegram);
-app.post('/api/auth/tg-request', tgClientController.requestTgCode);
+app.post('/api/auth/tg-request', tgRequestLimiter, tgRequestIpLimiter, tgClientController.requestTgCode);
 app.post('/api/auth/tg-verify', tgClientController.verifyTgCode);
 
 // Telegram bot webhook (клиентская авторизация)
@@ -181,15 +224,30 @@ app.post('/api/admin/beans/add', authenticateToken, requireRole('admin', 'owner'
 app.post('/api/admin/beans/deduct', authenticateToken, requireRole('admin', 'owner'), adminController.deductBeans);
 app.get('/api/admin/clients', authenticateToken, requireRole('admin', 'owner'), adminController.getClients);
 app.post('/api/admin/news', authenticateToken, requireRole('admin', 'owner'), adminController.createNews);
-app.get(/api/admin/news, authenticateToken, requireRole(admin,owner), adminController.getAllNews);
-app.put(/api/admin/news/:id, authenticateToken, requireRole(admin,owner), adminController.updateNews);
-app.delete(/api/admin/news/:id, authenticateToken, requireRole(admin,owner), adminController.deleteNews);
+app.put('/api/admin/news/:id', authenticateToken, requireRole('admin', 'owner'), adminController.updateNews);
+app.delete('/api/admin/news/:id', authenticateToken, requireRole('admin', 'owner'), adminController.deleteNews);
+
+// Seller (бариста) routes
+app.post('/api/seller/scan', authenticateToken, requireRole('seller', 'admin', 'owner'), sellerController.scanOrLookup);
+app.post('/api/seller/beans/add', authenticateToken, requireRole('seller', 'admin', 'owner'), sellerController.addBeans);
+app.post('/api/seller/beans/redeem', authenticateToken, requireRole('seller', 'admin', 'owner'), sellerController.redeem);
 
 // Owner routes
 app.get('/api/owner/dashboard', authenticateToken, requireRole('owner'), ownerController.getDashboard);
+app.get('/api/owner/stats', authenticateToken, requireRole('owner'), ownerController.getStats);
 app.get('/api/owner/analytics', authenticateToken, requireRole('owner'), ownerController.getAnalytics);
 app.get('/api/owner/transactions', authenticateToken, requireRole('owner'), ownerController.getAllTransactions);
 app.get('/api/owner/export', authenticateToken, requireRole('owner'), ownerController.exportData);
+
+// Owner: афиша (management)
+app.get('/api/owner/events', authenticateToken, requireRole('owner'), eventController.getAllEvents);
+app.post('/api/owner/events', authenticateToken, requireRole('owner'), eventController.createEvent);
+app.put('/api/owner/events/:id', authenticateToken, requireRole('owner'), eventController.updateEvent);
+app.delete('/api/owner/events/:id', authenticateToken, requireRole('owner'), eventController.deleteEvent);
+app.patch('/api/owner/events/:id/visibility', authenticateToken, requireRole('owner'), eventController.toggleEventVisibility);
+
+// Публичная афиша
+app.get('/api/public/events', eventController.getPublicEvents);
 
 // Banner routes
 app.get('/api/banners', bannerController.getBanners);

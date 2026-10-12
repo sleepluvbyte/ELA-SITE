@@ -149,6 +149,27 @@ export async function verifyCode(req, res) {
   }
 }
 
+// Текущий пользователь по токену (для валидации сессии на фронте).
+export async function me(req, res) {
+  try {
+    const u = req.user;
+    res.json({
+      user: {
+        id: u.id,
+        login: u.login || null,
+        email: u.email || null,
+        name: u.name || null,
+        phone: u.phone || null,
+        role: u.role,
+        beans_count: u.beans_count
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+}
+
 export async function loginAdmin(req, res) {
   try {
     const login = typeof req.body.login === 'string' ? req.body.login.trim().slice(0, 255) : '';
@@ -159,8 +180,8 @@ export async function loginAdmin(req, res) {
     }
 
     const result = await db.query(
-      'SELECT * FROM users WHERE login = $1 AND role IN ($2, $3)',
-      [login, 'admin', 'owner']
+      'SELECT * FROM users WHERE login = $1 AND role IN ($2, $3, $4)',
+      [login, 'admin', 'owner', 'seller']
     );
 
     if (result.rows.length === 0) {
@@ -215,6 +236,16 @@ export async function createInitialAdmins() {
     VALUES ($1, $2, 'Владелец', 'owner')
     ON CONFLICT (login) DO NOTHING
   `, [process.env.OWNER_LOGIN, ownerPassword]);
+
+  // Бариста (продавец): отдельная роль, начисляет и списывает зёрна.
+  if (process.env.SELLER_LOGIN && process.env.SELLER_PASSWORD) {
+    const sellerPassword = await bcrypt.hash(process.env.SELLER_PASSWORD, 10);
+    await db.query(`
+      INSERT INTO users (login, password, name, role)
+      VALUES ($1, $2, 'Бариста', 'seller')
+      ON CONFLICT (login) DO NOTHING
+    `, [process.env.SELLER_LOGIN, sellerPassword]);
+  }
 
   console.log('✅ Initial admins created');
 }

@@ -1,6 +1,7 @@
 import QRCode from 'qrcode';
 import { db } from '../config/database.js';
 import crypto from 'crypto';
+import { REWARD_THRESHOLD } from '../config/constants.js';
 
 export async function getProfile(req, res) {
   try {
@@ -65,21 +66,21 @@ export async function redeemReward(req, res) {
     const userId = req.user.id;
     const user = req.user;
 
-    if (user.beans_count < 7) {
+    if (user.beans_count < REWARD_THRESHOLD) {
       return res.status(400).json({ 
-        error: 'Недостаточно зёрен. Нужно 7, у вас: ' + user.beans_count 
+        error: `Недостаточно зёрен. Нужно ${REWARD_THRESHOLD}, у вас: ${user.beans_count}` 
       });
     }
 
     await db.query(
-      'UPDATE users SET beans_count = beans_count - 7 WHERE id = $1',
-      [userId]
+      'UPDATE users SET beans_count = beans_count - $1 WHERE id = $2',
+      [REWARD_THRESHOLD, userId]
     );
 
     await db.query(
       `INSERT INTO transactions (user_id, type, beans_change, description) 
-       VALUES ($1, 'reward_redeem', -7, 'Бесплатный напиток')`,
-      [userId]
+       VALUES ($1, 'reward_redeem', $2, 'Бесплатный напиток')`,
+      [userId, -REWARD_THRESHOLD]
     );
 
     res.json({

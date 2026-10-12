@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ПИПЛ — Кабинет владельца</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #95B8D9;
+  --ink: #243029;
+  --paper: #F5F1EA;
+  --paper-soft: rgba(245, 241, 234, 0.75);
+  --success: #4A8B5C;
+  --danger: #B4553A;
+  --warning: #C88A3E;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #95B8D9;
+  color: #243029;
+  min-height: 100vh;
+  padding: 20px;
+  font-weight: 700;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 2px solid #243029;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.header h1 {
+  font-size: 28px;
+  text-transform: uppercase;
+  letter-spacing: -1px;
+}
+
+.header a {
+  color: #243029;
+  text-decoration: none;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 10px 18px;
+  border: 2px solid #243029;
+  border-radius: 100px;
+  transition: all 0.2s;
+}
+
+.header a:hover {
+  background: #243029;
+  color: #F5F1EA;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 30px;
+  border-bottom: 2px solid #243029;
+}
+
+.tab {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 14px 24px;
+  background: transparent;
+  color: rgba(36,48,41,0.5);
+  border: none;
+  cursor: pointer;
+  border-bottom: 4px solid transparent;
+  margin-bottom: -2px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+.tab:hover { color: #243029; }
+.tab.active { color: #243029; border-bottom-color: #243029; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Статистика */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.stat {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid #243029;
+  padding: 24px;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.stat:hover {
+  background: rgba(255,255,255,0.3);
+  transform: translateY(-3px);
+}
+
+.stat-label {
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  opacity: 0.7;
+}
+
+.stat-value {
+  font-size: 36px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.stat-value span { font-size: 16px; opacity: 0.6; margin-left: 4px; }
+
+.stat-change { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-change.up { color: #2d5c3a; }
+.stat-change.down { color: #8b3a24; }
+
+/* Блок */
+.block {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid #243029;
+  padding: 24px;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.block-title {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(36,48,41,0.3);
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.block-title .count {
+  font-family: monospace;
+  font-size: 12px;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+/* Форма и события */
+.events-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 900px) {
+  .events-layout { grid-template-columns: 1fr 380px; }
+}
+
+.events-list { display: flex; flex-direction: column; gap: 12px; }
+
+.event-item {
+  background: rgba(255,255,255,0.15);
+  border: 2px solid rgba(36,48,41,0.4);
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 70px 1fr auto;
+  gap: 16px;
+  align-items: center;
+  border-radius: 4px;
+  transition: all 0.3s;
+}
+
+.event-item:hover {
+  border-color: #243029;
+  background: rgba(255,255,255,0.25);
+  transform: translateX(4px);
+}
+
+.event-item.hidden-event {
+  opacity: 0.5;
+  background: rgba(255,255,255,0.08);
+}
+
+.event-date {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #243029;
+  color: #F5F1EA;
+  padding: 8px 4px;
+  border-radius: 4px;
+  min-height: 60px;
+}
+
+.event-date .day { font-size: 24px; font-weight: 900; line-height: 1; }
+.event-date .month { font-size: 10px; letter-spacing: 1px; margin-top: 4px; text-transform: uppercase; }
+
+.event-info { min-width: 0; }
+
+.event-info h3 {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.event-info p {
+  font-size: 12px;
+  opacity: 0.75;
+  font-weight: 500;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.event-actions { display: flex; gap: 6px; }
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #243029;
+  background: transparent;
+  color: #243029;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 900;
+  border-radius: 4px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.icon-btn:hover {
+  background: #243029;
+  color: #F5F1EA;
+  transform: translate(-2px, -2px);
+  box-shadow: 3px 3px 0 #243029;
+}
+
+.icon-btn.delete:hover { background: #B4553A; border-color: #B4553A; color: white; }
+.icon-btn.eye:hover { background: #C88A3E; border-color: #C88A3E; color: white; }
+
+/* Панель редактирования */
+.editor {
+  background: rgba(255,255,255,0.2);
+  border: 3px solid #243029;
+  padding: 24px;
+  border-radius: 4px;
+  position: sticky;
+  top: 20px;
+  align-self: start;
+}
+
+.editor-title {
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(36,48,41,0.4);
+}
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-family: monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  opacity: 0.8;
+}
+
+.field input,
+.field textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #243029;
+  background: rgba(255,255,255,0.3);
+  color: #243029;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  border-radius: 4px;
+  transition: all 0.2s;
+  outline: none;
+}
+
+.field input:focus,
+.field textarea:focus {
+  background: white;
+  box-shadow: 3px 3px 0 #243029;
+  transform: translate(-2px, -2px);
+}
+
+.field textarea { resize: vertical; min-height: 80px; }
+
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.checkbox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px 14px;
+  border: 2px solid #243029;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.15);
+  margin-bottom: 14px;
+  transition: all 0.2s;
+}
+
+.checkbox:hover { background: rgba(255,255,255,0.3); }
+
+.checkbox input { width: 18px; height: 18px; cursor: pointer; }
+
+.checkbox span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Кнопки */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 22px;
+  font-family: inherit;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 2px solid #243029;
+  background: #243029;
+  color: #F5F1EA;
+  border-radius: 4px;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+
+.btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 4px 4px 0 #F5F1EA;
+}
+
+.btn-outline { background: transparent; color: #243029; }
+.btn-outline:hover { background: #243029; color: #F5F1EA; box-shadow: 4px 4px 0 #F5F1EA; }
+
+.btn-success { background: #4A8B5C; border-color: #4A8B5C; color: white; }
+.btn-success:hover { box-shadow: 4px 4px 0 #F5F1EA; }
+
+.btn-danger { background: #B4553A; border-color: #B4553A; color: white; }
+.btn-danger:hover { box-shadow: 4px 4px 0 #F5F1EA; }
+
+.btn-block { width: 100%; }
+
+.editor-actions { display: flex; gap: 8px; margin-top: 20px; }
+
+.hidden { display: none !important; }
+
+/* Уведомление */
+.notification {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  padding: 16px 24px;
+  background: #243029;
+  color: #F5F1EA;
+  border: 2px solid #F5F1EA;
+  border-radius: 4px;
+  box-shadow: 6px 6px 0 #F5F1EA;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 999;
+  opacity: 0;
+  transform: translateX(400px);
+  transition: all 0.4s;
+}
+
+.notification.show { opacity: 1; transform: translateX(0); }
+.notification.success { background: #4A8B5C; }
+.notification.error { background: #B4553A; }
+
+/* Пустое состояние */
+.empty {
+  padding: 60px 20px;
+  text-align: center;
+  border: 2px dashed rgba(36,48,41,0.4);
+  border-radius: 4px;
+  opacity: 0.7;
+}
+
+.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
+.empty-text { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<div class="notification" id="notification"></div>
+
+<div class="container">
+
+  <div class="header">
+    <h1>КАБИНЕТ ВЛАДЕЛЬЦА</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <a href="#" id="logoutLink" class="hidden" onclick="logout();return false;">Выйти →</a>
+      <a href="index.html">← На главную</a>
+    </div>
+  </div>
+
+  <div id="loginPanel" class="block" style="max-width:420px;margin:60px auto;">
+    <div class="block-title">ВХОД ДЛЯ ВЛАДЕЛЬЦА</div>
+    <div class="field">
+      <label>ЛОГИН</label>
+      <input type="text" id="login" placeholder="Логин" autocomplete="username">
+    </div>
+    <div class="field">
+      <label>ПАРОЛЬ</label>
+      <input type="password" id="password" placeholder="Пароль" autocomplete="current-password">
+    </div>
+    <button class="btn btn-block btn-success" onclick="doLogin()">ВОЙТИ</button>
+    <p id="loginMsg" style="margin-top:12px;font-family:monospace;font-size:12px;letter-spacing:0.5px;color:#8b3a24;min-height:16px;"></p>
+  </div>
+
+  <div id="dashboardPanel" class="hidden">
+
+  <div class="tabs">
+    <button class="tab active" data-tab="stats">Статистика</button>
+    <button class="tab" data-tab="events">Афиша</button>
+  </div>
+
+  <!-- СТАТИСТИКА -->
+  <div class="tab-content active" id="tab-stats">
+
+    <div style="display:flex;gap:8px;margin-bottom:20px;">
+      <button class="btn btn-success" style="flex:1" id="periodWeek" onclick="setPeriod('week')">НЕДЕЛЯ</button>
+      <button class="btn btn-outline" style="flex:1" id="periodMonth" onclick="setPeriod('month')">МЕСЯЦ</button>
+      <button class="btn btn-outline" style="flex:1" id="periodYear" onclick="setPeriod('year')">ГОД</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">// ПОКУПОК</div>
+        <div class="stat-value"><span id="statPurchasesVal" style="font-size:36px;font-weight:900;">0</span><span>шт</span></div>
+        <div class="stat-change up" id="statPurchasesChange">за период</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">// НАЧИСЛЕНО ЗЁРЕН</div>
+        <div class="stat-value"><span id="statBeansVal" style="font-size:36px;font-weight:900;">0</span><span>зёрен</span></div>
+        <div class="stat-change up" id="statBeansChange">за период</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">// ПОДАРЕНО НАПИТКОВ</div>
+        <div class="stat-value"><span id="statRewardsVal" style="font-size:36px;font-weight:900;">0</span><span>шт</span></div>
+        <div class="stat-change up" id="statRewardsChange">за период</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">// АКТИВНЫХ ГОСТЕЙ</div>
+        <div class="stat-value"><span id="statClientsVal" style="font-size:36px;font-weight:900;">0</span><span>чел</span></div>
+        <div class="stat-change up" id="statClientsChange">за период</div>
+      </div>
+    </div>
+
+    <div class="block">
+      <div class="block-title">
+        ТОП-5 ГОСТЕЙ
+        <span class="count">// ПО ЗЁРНАМ</span>
+      </div>
+      <div id="topClients" style="display:flex;flex-direction:column;gap:0;"></div>
+    </div>
+  </div>
+
+  <!-- АФИША -->
+  <div class="tab-content" id="tab-events">
+
+    <div class="block">
+      <div class="block-title">
+        УПРАВЛЕНИЕ АФИШЕЙ
+        <span class="count">// <span id="eventCount">0</span> событий</span>
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <button class="btn btn-success" onclick="newEvent()">+ Новое событие</button>
+      </div>
+
+      <div class="events-layout">
+
+        <div class="events-list" id="eventsList"></div>
+
+        <div class="editor">
+          <div class="editor-title" id="editorTitle">НОВОЕ СОБЫТИЕ</div>
+
+          <input type="hidden" id="eventId">
+
+          <div class="field">
+            <label>Название</label>
+            <input type="text" id="eventTitle" placeholder="ВИНИЛОВЫЙ ВЕЧЕР">
+          </div>
+
+          <div class="field">
+            <label>Описание</label>
+            <textarea id="eventDesc" placeholder="Ставим пластинки, варим фильтр..."></textarea>
+          </div>
+
+          <div class="field-row">
+            <div class="field">
+              <label>День</label>
+              <input type="text" id="eventDay" placeholder="18">
+            </div>
+            <div class="field">
+              <label>Месяц</label>
+              <input type="text" id="eventMonth" placeholder="МАЯ">
+            </div>
+          </div>
+
+          <div class="field">
+            <label>День недели</label>
+            <input type="text" id="eventWeekday" placeholder="СБ">
+          </div>
+
+          <label class="checkbox">
+            <input type="checkbox" id="eventVisible" checked>
+            <span>Показывать на сайте</span>
+          </label>
+
+          <div class="editor-actions">
+            <button class="btn btn-success" style="flex:1;" onclick="saveEvent()">Сохранить</button>
+            <button class="btn btn-outline" onclick="newEvent()">Отмена</button>
+          </div>
+
+          <button class="btn btn-danger btn-block hidden" id="deleteBtn" style="margin-top:10px;" onclick="deleteEvent()">Удалить</button>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   API
+   ============================================================ */
+var API_BASE = '/api';
+if (location.protocol === 'file:' || /^https?:\/\/(localhost|127\.0\.0\.1)/.test(location.origin)) {
+  API_BASE = 'http://localhost:3000/api';
+}
+var STORE_TOKEN = 'pipl_token';
+var STORE_USER = 'pipl_user';
+
+function api(path, opts) {
+  opts = opts || {};
+  var headers = Object.assign({}, { 'Content-Type': 'application/json' }, opts.headers || {});
+  var token = localStorage.getItem(STORE_TOKEN);
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  var params = {
+    method: opts.method || 'GET',
+    headers: headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  };
+  return fetch(API_BASE + path, params).then(function(res) {
+    return res.json().catch(function() { return {}; }).then(function(data) {
+      data._status = res.status;
+      return data;
+    });
+  });
+}
+
+function byId(id) { return document.getElementById(id); }
+
+/* ============================================================
+   УВЕДОМЛЕНИЯ
+   ============================================================ */
+function notify(msg, type) {
+  var el = byId('notification');
+  el.textContent = msg;
+  el.className = 'notification show ' + (type || '');
+  clearTimeout(el._t);
+  el._t = setTimeout(function() { el.classList.remove('show'); }, 2500);
+}
+
+/* ============================================================
+   ВКЛАДКИ
+   ============================================================ */
+Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(tab) {
+  tab.addEventListener('click', function() {
+    Array.prototype.forEach.call(document.querySelectorAll('.tab'), function(t) { t.classList.remove('active'); });
+    Array.prototype.forEach.call(document.querySelectorAll('.tab-content'), function(c) { c.classList.remove('active'); });
+    tab.classList.add('active');
+    byId('tab-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+/* ============================================================
+   АВТОРИЗАЦИЯ
+   ============================================================ */
+function canAccess(user) {
+  return user && (user.role === 'owner' || user.role === 'admin');
+}
+
+function showLoggedIn() {
+  byId('loginPanel').classList.add('hidden');
+  byId('dashboardPanel').classList.remove('hidden');
+  byId('logoutLink').classList.remove('hidden');
+}
+
+function showLogin(msg) {
+  byId('loginPanel').classList.remove('hidden');
+  byId('dashboardPanel').classList.add('hidden');
+  byId('logoutLink').classList.add('hidden');
+  byId('loginMsg').textContent = msg || '';
+}
+
+function doLogin() {
+  var login = byId('login').value.trim();
+  var pass = byId('password').value;
+  var msg = byId('loginMsg');
+  msg.textContent = '';
+  if (!login || !pass) { msg.textContent = 'Введите логин и пароль'; return; }
+  api('/auth/login', { method: 'POST', body: { login: login, password: pass } }).then(function(d) {
+    if (d.error || !d.token) { msg.textContent = d.error || 'Неверные данные'; return; }
+    if (!canAccess(d.user)) { msg.textContent = 'Нет доступа к кабинету владельца'; return; }
+    localStorage.setItem(STORE_TOKEN, d.token);
+    localStorage.setItem(STORE_USER, JSON.stringify(d.user));
+    boot();
+  });
+}
+
+function logout() {
+  localStorage.removeItem(STORE_TOKEN);
+  localStorage.removeItem(STORE_USER);
+  showLogin('');
+}
+
+function boot() {
+  var token = localStorage.getItem(STORE_TOKEN);
+  if (!token) { showLogin(''); return; }
+  api('/auth/me').then(function(d) {
+    if (d._status === 401 || !d.user || !canAccess(d.user)) {
+      localStorage.removeItem(STORE_TOKEN);
+      localStorage.removeItem(STORE_USER);
+      showLogin('');
+      return;
+    }
+    localStorage.setItem(STORE_USER, JSON.stringify(d.user));
+    showLoggedIn();
+    loadStats();
+    loadEvents();
+  }).catch(function() { showLoggedIn(); });
+}
+
+/* ============================================================
+   СТАТИСТИКА
+   ============================================================ */
+var currentPeriod = 'week';
+
+function setPeriod(p) {
+  currentPeriod = p;
+  var map = { week: 'periodWeek', month: 'periodMonth', year: 'periodYear' };
+  for (var k in map) {
+    byId(map[k]).className = k === p ? 'btn btn-success' : 'btn btn-outline';
+  }
+  loadStats();
+}
+
+function renderTopClients(list) {
+  var box = byId('topClients');
+  if (!list || !list.length) {
+    box.innerHTML = '<div class="empty" style="padding:30px 20px;"><div class="empty-text">Пока нет гостей</div></div>';
+    return;
+  }
+  box.innerHTML = list.map(function(c, i) {
+    var name = (c.name || c.email || 'Гость');
+    return '<div style="display:grid;grid-template-columns:40px 1fr auto auto;gap:16px;padding:14px 0;border-bottom:1px solid rgba(36,48,41,0.2);align-items:center;">' +
+      '<div style="' + (i >= 3 ? 'font-size:18px;opacity:0.7;' : 'font-size:20px;') + 'font-weight:900;">' + String(i + 1).padStart(2, '0') + '</div>' +
+      '<div style="text-transform:uppercase;">' + esc(name) + '</div>' +
+      '<div style="font-family:monospace;font-size:12px;opacity:0.7;">#' + String(c.guest_number || c.id || '').padStart(4, '0') + '</div>' +
+      '<div style="font-weight:900;">' + (c.beans_count || 0) + '</div></div>';
+  }).join('');
+}
+
+function loadStats() {
+  api('/owner/stats?period=' + currentPeriod).then(function(d) {
+    if (d.error) { notify(d.error, 'error'); return; }
+    byId('statPurchasesVal').textContent = d.purchases;
+    byId('statBeansVal').textContent = d.beansDistributed;
+    byId('statRewardsVal').textContent = d.rewardsRedeemed;
+    byId('statClientsVal').textContent = d.activeClients;
+    var label = currentPeriod === 'year' ? 'за год' : currentPeriod === 'month' ? 'за месяц' : 'за неделю';
+    byId('statPurchasesChange').textContent = '• ' + label;
+    byId('statBeansChange').textContent = '• ' + label;
+    byId('statRewardsChange').textContent = '• ' + label;
+    byId('statClientsChange').textContent = '• ' + label;
+    renderTopClients(d.topClients);
+  });
+}
+
+/* ============================================================
+   ЭКРАНИРОВАНИЕ
+   ============================================================ */
+function esc(s) {
+  return String(s || '').replace(/[&<>"']/g, function(c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+/* ============================================================
+   АФИША · СОСТОЯНИЕ
+   ============================================================ */
+var events = [];
+var editingId = null;
+
+/* ============================================================
+   АФИША · РЕНДЕР
+   ============================================================ */
+function renderEvents() {
+  var list = byId('eventsList');
+  byId('eventCount').textContent = events.length;
+
+  if (!events.length) {
+    list.innerHTML = '<div class="empty">' +
+      '<div class="empty-icon">📅</div>' +
+      '<div class="empty-text">Афиша пуста<br>Добавьте событие</div>' +
+    '</div>';
+    return;
+  }
+
+  list.innerHTML = events.map(function(ev) {
+    return '<div class="event-item' + (ev.visible ? '' : ' hidden-event') + '">' +
+      '<div class="event-date">' +
+        '<div class="day">' + esc(ev.day) + '</div>' +
+        '<div class="month">' + esc(ev.month) + '</div>' +
+      '</div>' +
+      '<div class="event-info">' +
+        '<h3>' + esc(ev.title) + '</h3>' +
+        '<p>' + esc(ev.description) + '</p>' +
+      '</div>' +
+      '<div class="event-actions">' +
+        '<button class="icon-btn eye" onclick="toggleVisible(' + ev.id + ')" title="' + (ev.visible ? 'Скрыть' : 'Показать') + '">' + (ev.visible ? '◉' : '◌') + '</button>' +
+        '<button class="icon-btn" onclick="editEvent(' + ev.id + ')" title="Редактировать">✎</button>' +
+        '<button class="icon-btn delete" onclick="confirmDelete(' + ev.id + ')" title="Удалить">×</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function loadEvents() {
+  api('/owner/events').then(function(d) {
+    if (d.error) { notify(d.error, 'error'); return; }
+    if (!Array.isArray(d)) { notify('Некорректный ответ сервера', 'error'); return; }
+    events = d;
+    renderEvents();
+  });
+}
+
+/* ============================================================
+   АФИША · ДОБАВЛЕНИЕ / РЕДАКТИРОВАНИЕ
+   ============================================================ */
+function newEvent() {
+  editingId = null;
+  byId('editorTitle').textContent = 'НОВОЕ СОБЫТИЕ';
+  byId('eventId').value = '';
+  byId('eventTitle').value = '';
+  byId('eventDesc').value = '';
+  byId('eventDay').value = '';
+  byId('eventMonth').value = '';
+  byId('eventWeekday').value = '';
+  byId('eventVisible').checked = true;
+  byId('deleteBtn').classList.add('hidden');
+  byId('eventTitle').focus();
+}
+
+function editEvent(id) {
+  var ev = null;
+  for (var i = 0; i < events.length; i++) { if (events[i].id === id) { ev = events[i]; break; } }
+  if (!ev) return;
+  editingId = id;
+  byId('editorTitle').textContent = 'РЕДАКТИРОВАТЬ';
+  byId('eventId').value = ev.id;
+  byId('eventTitle').value = ev.title;
+  byId('eventDesc').value = ev.description || '';
+  byId('eventDay').value = ev.day;
+  byId('eventMonth').value = ev.month;
+  byId('eventWeekday').value = ev.weekday;
+  byId('eventVisible').checked = !!ev.visible;
+  byId('deleteBtn').classList.remove('hidden');
+  byId('eventTitle').focus();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ============================================================
+   АФИША · СОХРАНЕНИЕ
+   ============================================================ */
+function saveEvent() {
+  var title = byId('eventTitle').value.trim();
+  var desc = byId('eventDesc').value.trim();
+  var day = byId('eventDay').value.trim();
+  var month = byId('eventMonth').value.trim().toUpperCase();
+  var weekday = byId('eventWeekday').value.trim().toUpperCase();
+  var visible = byId('eventVisible').checked;
+
+  if (!title) { notify('Введите название', 'error'); return; }
+  if (!day) { notify('Введите день', 'error'); return; }
+  if (!month) { notify('Введите месяц', 'error'); return; }
+
+  var payload = {
+    title: title,
+    description: desc,
+    day: day,
+    month: month,
+    weekday: weekday,
+    visible: visible
+  };
+
+  var req;
+  if (editingId) {
+    req = api('/owner/events/' + editingId, { method: 'PUT', body: payload });
+  } else {
+    req = api('/owner/events', { method: 'POST', body: payload });
+  }
+
+  req.then(function(d) {
+    if (d.error) { notify(d.error, 'error'); return; }
+    notify(editingId ? 'Событие обновлено' : 'Событие добавлено', 'success');
+    loadEvents();
+    newEvent();
+  });
+}
+
+/* ============================================================
+   АФИША · УДАЛЕНИЕ
+   ============================================================ */
+function confirmDelete(id) {
+  var ev = null;
+  for (var i = 0; i < events.length; i++) { if (events[i].id === id) { ev = events[i]; break; } }
+  if (!ev) return;
+  if (confirm('Удалить "' + ev.title + '"?')) {
+    api('/owner/events/' + id, { method: 'DELETE' }).then(function(d) {
+      if (d.error) { notify(d.error, 'error'); return; }
+      if (editingId === id) newEvent();
+      loadEvents();
+      notify('Удалено', 'success');
+    });
+  }
+}
+
+function deleteEvent() {
+  if (!editingId) return;
+  confirmDelete(editingId);
+}
+
+/* ============================================================
+   АФИША · ВИДИМОСТЬ
+   ============================================================ */
+function toggleVisible(id) {
+  api('/owner/events/' + id + '/visibility', { method: 'PATCH' }).then(function(d) {
+    if (d.error) { notify(d.error, 'error'); return; }
+    loadEvents();
+    notify('Готово', 'success');
+  });
+}
+
+/* ============================================================
+   СТАРТ
+   ============================================================ */
+(function() {
+  byId('password').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+  newEvent();
+  boot();
+})();
+</script>
+</body>
+</html>

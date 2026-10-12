@@ -60,6 +60,63 @@ export async function getDashboard(req, res) {
   }
 }
 
+// Сводная статистика для кабинета владельца.
+// period: week (7 дней) | month (30) | year (365).
+export async function getStats(req, res) {
+  try {
+    const period = String(req.query.period || 'week').toLowerCase();
+    const days = period === 'year' ? 365 : period === 'month' ? 30 : 7;
+
+    const purchases = await db.query(
+      `SELECT COUNT(*)::int AS count FROM transactions
+       WHERE type = 'admin_add' AND created_at > NOW() - make_interval(days => $1)`,
+      [days]
+    );
+
+    const beansDistributed = await db.query(
+      `SELECT COALESCE(SUM(beans_change), 0)::int AS total FROM transactions
+       WHERE type = 'admin_add' AND created_at > NOW() - make_interval(days => $1)`,
+      [days]
+    );
+
+    const rewardsRedeemed = await db.query(
+      `SELECT COUNT(*)::int AS count FROM transactions
+       WHERE type IN ('reward_redeem', 'admin_redeem')
+         AND created_at > NOW() - make_interval(days => $1)`,
+      [days]
+    );
+
+    const activeClients = await db.query(
+      `SELECT COUNT(DISTINCT user_id)::int AS count FROM transactions
+       WHERE created_at > NOW() - make_interval(days => $1)`,
+      [days]
+    );
+
+    const topClients = await db.query(
+      `SELECT id, name, email, beans_count, total_spent
+       FROM users WHERE role = 'client'
+       ORDER BY beans_count DESC, total_spent DESC
+       LIMIT 5`
+    );
+
+    res.json({
+      period,
+      days,
+      purchases: purchases.rows[0].count,
+      beansDistributed: beansDistributed.rows[0].total,
+      rewardsRedeemed: rewardsRedeemed.rows[0].count,
+      activeClients: activeClients.rows[0].count,
+      topClients: topClients.rows.map((c) => ({
+        ...c,
+        guest_number: String(c.id).padStart(4, '0')
+      }))
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Ошибка сервера' });
+  }
+}
+
 export async function getAnalytics(req, res) {
   try {
     // Период приводим к целому положительному числу, чтобы исключить SQL-инъекцию
