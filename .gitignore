@@ -5,6 +5,7 @@ node_modules/
 pipl_backend/.env
 pipl_backend/.env.bak
 pipl_backend/.env.bak.*
+pipl_backend/.env.bak_*
 frontend/.env
 
 # runtime / uploads
