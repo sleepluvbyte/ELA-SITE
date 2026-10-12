@@ -87,7 +87,7 @@ body {
   font-family: inherit;
 }
 
-.tab:hover { color: #243029; }
+.tab:hover { color: #243029; background: rgba(245, 241, 234, 0.4); }
 .tab.active { color: #243029; border-bottom-color: #243029; }
 
 .tab-content { display: none; }
@@ -385,6 +385,25 @@ body {
 .btn-danger:hover { box-shadow: 4px 4px 0 #F5F1EA; }
 
 .btn-block { width: 100%; }
+
+/* Доступность и кликабельность */
+a { cursor: pointer; }
+button:not(:disabled) { cursor: pointer; }
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+a:focus-visible,
+button:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid #F5F1EA;
+  outline-offset: 3px;
+}
+.btn:active {
+  transform: translate(0, 0);
+  box-shadow: none;
+}
 
 .editor-actions { display: flex; gap: 8px; margin-top: 20px; }
 
