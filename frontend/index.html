@@ -1479,6 +1479,11 @@ button:focus-visible,
   border: 2px solid var(--bg);
 }
 
+@media (max-width: 640px) {
+  /* Тяжёлые фоновые декорации отключаем на телефонах — греют GPU и создают лаги */
+  .vinyl, .bg-circle, .bg-steam, .bg-ring, .music-lines { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .bg-decorations *,
   .marquee-track,
@@ -1568,7 +1573,7 @@ button:focus-visible,
 <header class="site-header">
   <div class="container header-inner">
     <div class="logo-wrap" id="headerLogo" onclick="router.navigate('home')">
-      <img src="logo.png" alt="ПИПЛ" class="logo-img"
+      <img src="logo.webp" alt="ПИПЛ" class="logo-img"
            onload="this.parentElement.classList.remove('no-image');"
            onerror="this.parentElement.classList.add('no-image');">
       <div class="logo-fallback">
@@ -1577,7 +1582,6 @@ button:focus-visible,
       </div>
     </div>
     <nav class="nav">
-      <a class="nav-link" onclick="router.navigate('loyalty');return false;" href="#">Проекты</a>
       <a class="nav-link" onclick="router.navigate('loyalty');return false;" href="#">О нас</a>
       <a class="nav-link" onclick="router.navigate('events');return false;" href="#">Афиша</a>
       <a class="nav-link" onclick="router.navigate('contacts');return false;" href="#">Контакты</a>
@@ -1614,15 +1618,15 @@ button:focus-visible,
       <div class="photo-block fade-in delay-2" id="heroPhotoBlock">
         <div class="photo-circle" id="photoCircle">
           <div class="photo-slide active" style="background-image: url('photo1.webp');"></div>
-          <div class="photo-slide" style="background-image: url('photo2.webp');"></div>
-          <div class="photo-slide" style="background-image: url('photo3.webp');"></div>
-          <div class="photo-slide" style="background-image: url('photo4.webp');"></div>
-          <div class="photo-slide" style="background-image: url('photo5.webp');"></div>
-          <div class="photo-slide" style="background-image: url('photo6.webp');"></div>
+          <div class="photo-slide" data-src="photo2.webp"></div>
+          <div class="photo-slide" data-src="photo3.webp"></div>
+          <div class="photo-slide" data-src="photo4.webp"></div>
+          <div class="photo-slide" data-src="photo5.webp"></div>
+          <div class="photo-slide" data-src="photo6.webp"></div>
 
           <div class="photo-overlay"></div>
 
-          <img src="logo.png" alt="ПИПЛ" class="hero-logo-img"
+          <img src="logo.webp" alt="ПИПЛ" class="hero-logo-img"
                onload="this.parentElement.classList.remove('no-logo');"
                onerror="this.parentElement.classList.add('no-logo');">
           <div class="hero-logo-fallback">
@@ -1841,7 +1845,7 @@ button:focus-visible,
   <div class="modal-box">
     <button class="modal-close" onclick="auth.closeModal()">×</button>
 
-    <img src="logo.png" alt="ПИПЛ" class="modal-logo"
+    <img src="logo.webp" alt="ПИПЛ" class="modal-logo"
          onerror="this.style.display='none';">
 
     <div class="auth-tabs">
@@ -1893,6 +1897,16 @@ button:focus-visible,
   var slides = document.querySelectorAll('.photo-slide');
   var dots = document.querySelectorAll('.carousel-dot');
   if (!slides.length) return;
+
+  // Отложенная загрузка фото 2-6 (не блокирует первый рендер)
+  function loadDeferred() {
+    slides.forEach(function(s) {
+      var src = s.getAttribute('data-src');
+      if (src) { s.style.backgroundImage = 'url("' + src + '")'; s.removeAttribute('data-src'); }
+    });
+  }
+  if ('requestIdleCallback' in window) requestIdleCallback(loadDeferred, { timeout: 2000 });
+  else setTimeout(loadDeferred, 1200);
 
   var current = 0;
   var interval = 4000;
