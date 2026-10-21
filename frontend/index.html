@@ -1294,6 +1294,66 @@ button:focus-visible,
   50% { top: 92%; opacity: 1; }
   100% { top: 8%; opacity: 0.5; }
 }
+
+/* Полноэкранный сканер QR (камера) */
+.qr-scanner {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#qr-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+.qr-scan-frame {
+  position: relative;
+  width: min(70vw, 300px);
+  height: min(70vw, 300px);
+  border: 2px solid var(--paper);
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.55);
+  z-index: 1;
+}
+.qr-scan-frame::before,
+.qr-scan-frame::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0;
+  height: 3px;
+  background: var(--paper);
+  box-shadow: 0 0 16px var(--paper);
+  animation: scanline 2.2s ease-in-out infinite;
+}
+.qr-scan-status {
+  position: absolute;
+  bottom: 110px;
+  left: 0; right: 0;
+  text-align: center;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  z-index: 2;
+  padding: 0 20px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+}
+.qr-scan-close {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(80%, 320px);
+  z-index: 2;
+}
 .qr-icon {
   color: var(--paper);
   opacity: 0.9;
@@ -1799,7 +1859,7 @@ button:focus-visible,
         <div class="qr-box">
           <div class="qr-icon">▣</div>
         </div>
-        <button class="btn btn-block" onclick="seller.simulateScan()">📷 ИМИТИРОВАТЬ СКАНИРОВАНИЕ</button>
+        <button class="btn btn-block" onclick="seller.startScan()">📷 СКАНИРОВАТЬ QR</button>
         <p style="font-family:'Courier New',monospace;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;opacity:0.75;margin-top:14px;color:var(--paper-soft)">// ИЛИ ВВЕДИТЕ ДАННЫЕ ВРУЧНУЮ</p>
       </div>
 
@@ -1839,6 +1899,14 @@ button:focus-visible,
     </div>
   </section>
 </main>
+
+<!-- QR СКАНЕР (камера) -->
+<div id="qr-scanner" class="qr-scanner hidden">
+  <video id="qr-video" playsinline muted></video>
+  <div class="qr-scan-frame"></div>
+  <p id="qr-status" class="qr-scan-status">ЗАПУСКАЕМ КАМЕРУ…</p>
+  <button class="btn btn-block qr-scan-close" onclick="seller.stopScan()">✕ ЗАКРЫТЬ</button>
+</div>
 
 <!-- МОДАЛКА -->
 <div id="auth-modal">
@@ -2243,8 +2311,104 @@ var seller = {
       this.showResult();
     }.bind(this));
   },
-  simulateScan: function() {
-    this.find('egoshka21@gmail.com', true);
+  // --- Камерное сканирование QR ---
+  startScan: function() {
+    var self = this;
+    var overlay = document.getElementById('qr-scanner');
+    var video = document.getElementById('qr-video');
+    var status = document.getElementById('qr-status');
+    overlay.classList.remove('hidden');
+    status.textContent = 'ЗАПУСКАЕМ КАМЕРУ…';
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      status.textContent = 'КАМЕРА НЕДОСТУПНА — ВВЕДИТЕ ВРУЧНУЮ';
+      return;
+    }
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } })
+      .then(function(stream) {
+        self._stream = stream;
+        video.srcObject = stream;
+        return video.play();
+      })
+      .then(function() { self._scanLoop(); })
+      .catch(function(err) {
+        status.textContent = 'НЕТ ДОСТУПА К КАМЕРЕ — ВВЕДИТЕ ВРУЧНУЮ';
+        console.error('camera error', err);
+      });
+  },
+  _scanLoop: function() {
+    var self = this;
+    this._scanning = true;
+    var video = document.getElementById('qr-video');
+    document.getElementById('qr-status').textContent = 'НАВЕДИТЕ НА QR-КОД';
+
+    var detector = null;
+    if ('BarcodeDetector' in window) {
+      try { detector = new window.BarcodeDetector({ formats: ['qr_code'] }); } catch (e) { detector = null; }
+    }
+    var canvas = detector ? null : document.createElement('canvas');
+    var ctx = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
+    var lastTime = 0;
+
+    function tick() {
+      if (!self._scanning) return;
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        var now = performance.now();
+        if (now - lastTime > 150) {
+          lastTime = now;
+          if (detector) {
+            detector.detect(video).then(function(codes) {
+              if (self._scanning && codes && codes.length) self._onQR(codes[0].rawValue);
+            }).catch(function() {});
+          } else {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            var img = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            try {
+              var code = window.jsQR(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+              if (self._scanning && code && code.data) self._onQR(code.data);
+            } catch (e) {}
+          }
+        }
+      }
+      self._scanRaf = requestAnimationFrame(tick);
+    }
+    if (detector) { tick(); return; }
+    // Фолбэк (iOS/Safari): подгружаем jsQR и сканируем через canvas
+    this._ensureJsQR(function(ok) {
+      if (!ok) { document.getElementById('qr-status').textContent = 'ДЕКОДЕР НЕ ЗАГРУЗИЛСЯ — ВВЕДИТЕ ВРУЧНУЮ'; return; }
+      tick();
+    });
+  },
+  _ensureJsQR: function(cb) {
+    if (window.jsQR) return cb(true);
+    var s = document.createElement('script');
+    s.src = 'jsQR.min.js';
+    s.onload = function() { cb(true); };
+    s.onerror = function() { cb(false); };
+    document.head.appendChild(s);
+  },
+  _onQR: function(text) {
+    if (!text || this._busy) return;
+    this._busy = true;
+    this._scanning = false;
+    this.stopScan();
+    var msg = document.getElementById('sellerMsg');
+    setMsg(msg, 'Ищем гостя…');
+    var self = this;
+    api('/seller/scan', { method: 'POST', body: { qrData: text } }).then(function(data) {
+      if (data.error) { setMsg(msg, data.error, true); return; }
+      self.current = data.user;
+      self.showResult();
+    }).finally(function() { self._busy = false; });
+  },
+  stopScan: function() {
+    this._scanning = false;
+    if (this._scanRaf) { cancelAnimationFrame(this._scanRaf); this._scanRaf = null; }
+    if (this._stream) { this._stream.getTracks().forEach(function(t) { t.stop(); }); this._stream = null; }
+    var v = document.getElementById('qr-video'); if (v) v.srcObject = null;
+    document.getElementById('qr-scanner').classList.add('hidden');
   },
   manualSearch: function() {
     var input = document.getElementById('manual-input').value.trim();
