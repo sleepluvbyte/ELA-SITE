@@ -11,11 +11,20 @@ pipl_backend/          серверная часть (Node.js / Express / Postgr
   src/controllers/     auth / client / seller / owner / admin / events / tgClient / telegram
   src/services/        email (коды подтверждения), Telegram-бот
 frontend/              фронтенд (новая вёрстка, деплоится на сервер)
-  index.html           главная: вход по email+коду (ГОСТЬ) и по логину (ПЕРСОНАЛ), афиша
+  index.html           главная: вход гостя по email+коду, афиша, карусель фото
   owner.html           кабинет владельца: статистика, афиша (CRUD), экран логина
-  personals.html       устаревшая страница персонала (оставлена на сервере)
-  logo.png, photo1-6.webp
+  jsQR.min.js          декодер QR для камеры (фолбэк для iOS/Safari без BarcodeDetector)
+  logo.webp, photo1-6.webp
 ```
+
+## Ссылки для персонала
+
+| Ссылка                 | Кто             | Что открывает                                    |
+|------------------------|-----------------|--------------------------------------------------|
+| `https://piplcoffee.ru/barista` | бариста  | отдельная страница входа → кабинет сканера QR    |
+| `https://piplcoffee.ru/owner`   | владелец | кабинет владельца (свой экран логина)             |
+
+Вкладка «ПЕРСОНАЛ» из модалки входа гостя убрана. Старый `/personals` и `/staff.html` редиректят на `/barista`.
 
 ## Как это разложено на сервере (продакшен)
 
@@ -27,7 +36,7 @@ frontend/              фронтенд (новая вёрстка, деплои
 
 - На сервере backend крутится как systemd-сервис `pipl-api` (рабочая папка `/opt/pipl/backend`).
 - Почта для кодов подтверждения и SMTP-ключи: `backend/.env` → `SMTP_*`, `EMAIL_FROM`; после правки `systemctl restart pipl-api`.
-- Статика и прокси на `/api`/`/owner`/`/personals` — Caddy (`/etc/caddy/Caddyfile`).
+- Статика и прокси на `/api`/`/owner`/`/barista` — Caddy (`/etc/caddy/Caddyfile`).
 - Аккаунты ролей задаются в `backend/.env`: `OWNER_LOGIN/OWNER_PASSWORD`, `SELLER_LOGIN/SELLER_PASSWORD`, `ADMIN_LOGIN/ADMIN_PASSWORD`.
 
 ## API (кратко)

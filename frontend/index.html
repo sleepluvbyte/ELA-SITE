@@ -419,6 +419,15 @@ button:focus-visible,
 /* СТРАНИЦЫ */
 .page-section { display: none; }
 .page-section.active { display: block; animation: pageIn 0.35s ease forwards; }
+
+/* Режим баристы (/barista): прячем публичную навигацию, оставляем только сканер */
+body.staff-mode header.site-header .nav { display: none; }
+body.staff-mode header.site-header .btn { display: none; }
+body.staff-mode #page-home,
+body.staff-mode #page-events,
+body.staff-mode #page-loyalty,
+body.staff-mode #page-contacts,
+body.staff-mode #page-client { display: none !important; }
 @keyframes pageIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -563,7 +572,11 @@ button:focus-visible,
     0 25px 60px rgba(36, 48, 41, 0.35),
     0 0 0 12px rgba(245, 241, 234, 0.15);
   transition: transform 0.6s var(--ease), box-shadow 0.6s var(--ease);
+  cursor: grab;
+  touch-action: pan-y pinch-zoom;
+  user-select: none;
 }
+.photo-circle:active { cursor: grabbing; }
 
 .photo-block:hover .photo-circle {
   transform: scale(1.02);
@@ -592,6 +605,20 @@ button:focus-visible,
   animation: ringRotate 60s linear infinite reverse;
   pointer-events: none;
   z-index: 5;
+}
+.photo-circle.is-spinning::before,
+.photo-circle.is-spinning::after {
+  animation-duration: 6s;
+}
+/* Эффект виниловой пластинки: фото внутри круга прокручивается как диск */
+.photo-circle.is-spinning .photo-slide {
+  animation: vinylSpin 0.9s cubic-bezier(0.22, 0.75, 0.25, 1);
+  transform-origin: center center;
+}
+@keyframes vinylSpin {
+  0% { transform: rotate(0deg) scale(1); }
+  45% { transform: rotate(190deg) scale(1.06); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 @keyframes ringRotate {
   from { transform: rotate(0deg); }
@@ -624,6 +651,26 @@ button:focus-visible,
   z-index: 2;
   pointer-events: none;
 }
+
+/* Блик виниловой пластинки — появляется во время прокрутки фото */
+.photo-sheen {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  background:
+    conic-gradient(from 0deg at 50% 50%,
+      rgba(255, 255, 255, 0) 0deg,
+      rgba(255, 255, 255, 0.16) 32deg,
+      rgba(255, 255, 255, 0) 74deg,
+      rgba(255, 255, 255, 0) 186deg,
+      rgba(255, 255, 255, 0.12) 214deg,
+      rgba(255, 255, 255, 0) 258deg);
+  mix-blend-mode: screen;
+}
+.photo-circle.is-spinning .photo-sheen { opacity: 1; }
 
 /* Логотип поверх фото */
 .hero-logo-img {
@@ -665,6 +712,17 @@ button:focus-visible,
 }
 .photo-circle.no-logo .hero-logo-img { display: none; }
 .photo-circle.no-logo .hero-logo-fallback { display: flex; }
+
+/* Подсказка «свайп» под каруселью */
+.photo-swipe-hint {
+  margin-top: 10px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  color: var(--ink);
+}
 
 /* Точки-индикаторы снизу круга */
 .carousel-dots {
@@ -1485,31 +1543,7 @@ button:focus-visible,
   text-align: center;
 }
 
-/* ВКЛАДКИ ВХОДА: ГОСТЬ / ПЕРСОНАЛ */
-.auth-tabs {
-  display: flex;
-  gap: 0;
-  border-bottom: 2px solid var(--ink);
-  margin-bottom: 28px;
-}
-.auth-tab {
-  flex: 1;
-  padding: 12px 10px;
-  background: transparent;
-  border: none;
-  border-bottom: 4px solid transparent;
-  margin-bottom: -2px;
-  cursor: pointer;
-  font-family: 'Arial Narrow', sans-serif;
-  font-weight: 900;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: rgba(36, 48, 41, 0.55);
-  transition: all 0.2s ease;
-}
-.auth-tab:hover { color: var(--ink); background: rgba(245, 241, 234, 0.25); transition: all 0.2s ease; }
-.auth-tab.active { color: var(--paper); border-bottom-color: var(--paper); }
+/* ВХОД: ГОСТЬ (модалка) / ПЕРСОНАЛ (отдельные ссылки /barista, /owner) */
 .auth-msg {
   margin-top: 18px;
   font-family: 'Courier New', monospace;
@@ -1685,6 +1719,7 @@ button:focus-visible,
           <div class="photo-slide" data-src="photo6.webp"></div>
 
           <div class="photo-overlay"></div>
+          <div class="photo-sheen"></div>
 
           <img src="logo.webp" alt="ПИПЛ" class="hero-logo-img"
                onload="this.parentElement.classList.remove('no-logo');"
@@ -1706,6 +1741,7 @@ button:focus-visible,
           <div class="carousel-dot" data-slide="4"></div>
           <div class="carousel-dot" data-slide="5"></div>
         </div>
+        <p class="photo-swipe-hint">← СВАЙП →</p>
       </div>
     </div>
 
@@ -1916,11 +1952,6 @@ button:focus-visible,
     <img src="logo.webp" alt="ПИПЛ" class="modal-logo"
          onerror="this.style.display='none';">
 
-    <div class="auth-tabs">
-      <button class="auth-tab active" id="tabGuest" onclick="auth.switchMode('guest')">ГОСТЬ</button>
-      <button class="auth-tab" id="tabStaff" onclick="auth.switchMode('staff')">ПЕРСОНАЛ</button>
-    </div>
-
     <div id="guestStep1">
       <h2 class="modal-title">ВОЙТИ В ПИПЛ.</h2>
       <p class="modal-sub">// ВВЕДИТЕ EMAIL — ПРИШЛЁМ КОД</p>
@@ -1943,8 +1974,8 @@ button:focus-visible,
     </div>
 
     <div id="staffForm" class="hidden">
-      <h2 class="modal-title">ДЛЯ ПЕРСОНАЛА</h2>
-      <p class="modal-sub">// ВОЙТИ ПО ЛОГИНУ И ПАРОЛЮ</p>
+      <h2 class="modal-title">ВХОД ДЛЯ ПЕРСОНАЛА</h2>
+      <p class="modal-sub">// БАРИСТА / ВЛАДЕЛЕЦ</p>
 
       <label class="form-label">ЛОГИН</label>
       <input type="text" id="staff-login" class="input-clean" placeholder="Логин" autocomplete="username">
@@ -1953,6 +1984,7 @@ button:focus-visible,
       <input type="password" id="staff-pass" class="input-clean" placeholder="Пароль" autocomplete="current-password">
 
       <button class="btn btn-block" onclick="auth.staffLogin()" style="margin-top:8px">→ ВОЙТИ</button>
+      <button class="btn btn-block btn-outline" onclick="auth.closeModal()" style="margin-top:8px">← НАЗАД</button>
     </div>
 
     <p id="auth-msg" class="auth-msg"></p>
@@ -1989,22 +2021,65 @@ button:focus-visible,
     current = index;
   }
 
-  function next() { show((current + 1) % slides.length); }
+  function next() { 
+    var pc = document.getElementById('photoCircle');
+    if (pc) { pc.classList.add('is-spinning'); setTimeout(function(){ pc.classList.remove('is-spinning'); }, 850); }
+    show((current + 1) % slides.length); 
+  }
+  function prev() { 
+    var pc = document.getElementById('photoCircle');
+    if (pc) { pc.classList.add('is-spinning'); setTimeout(function(){ pc.classList.remove('is-spinning'); }, 850); }
+    show((current - 1 + slides.length) % slides.length); 
+  }
 
   var timer = setInterval(next, interval);
 
   dots.forEach(function(dot, i) {
     dot.addEventListener('click', function() {
       clearInterval(timer);
+      var pc = document.getElementById('photoCircle');
+      if (pc) { pc.classList.add('is-spinning'); setTimeout(function(){ pc.classList.remove('is-spinning'); }, 850); }
       show(i);
       timer = setInterval(next, interval);
     });
   });
 
   var photoBlock = document.getElementById('heroPhotoBlock');
+  var photoCircle = document.getElementById('photoCircle');
   if (photoBlock) {
     photoBlock.addEventListener('mouseenter', function() { clearInterval(timer); });
     photoBlock.addEventListener('mouseleave', function() { timer = setInterval(next, interval); });
+  }
+
+  // Свайп для телефона/мыши — как пластинка
+  if (photoCircle) {
+    var startX = 0, startY = 0, distX = 0, distY = 0, down = false;
+    var startTime = 0;
+    function onDown(e) {
+      down = true;
+      startTime = Date.now();
+      startX = (e.touches ? e.touches[0].clientX : e.clientX);
+      startY = (e.touches ? e.touches[0].clientY : e.clientY);
+      clearInterval(timer);
+    }
+    function onMove(e) {
+      if (!down) return;
+    }
+    function onUp(e) {
+      if (!down) return;
+      down = false;
+      distX = ((e.changedTouches ? e.changedTouches[0].clientX : e.clientX)) - startX;
+      distY = ((e.changedTouches ? e.changedTouches[0].clientY : e.clientY)) - startY;
+      if (Math.abs(distX) > 40 && Math.abs(distX) > Math.abs(distY)) {
+        if (distX < 0) next(); else prev();
+      }
+      timer = setInterval(next, interval);
+    }
+    photoCircle.addEventListener('mousedown', onDown);
+    photoCircle.addEventListener('touchstart', onDown, { passive: true });
+    photoCircle.addEventListener('mouseup', onUp);
+    photoCircle.addEventListener('mouseleave', function(){ if(down){ down=false; timer=setInterval(next,interval); } });
+    photoCircle.addEventListener('touchend', onUp);
   }
 })();
 
@@ -2205,26 +2280,38 @@ var auth = {
   mode: 'guest',
   email: '',
   openModal: function() {
-    this.switchMode('guest');
+    this.showGuest();
     this.resetSteps();
     document.getElementById('auth-modal').classList.add('open');
   },
-  closeModal: function() { document.getElementById('auth-modal').classList.remove('open'); },
+  openStaffModal: function() {
+    this.mode = 'staff';
+    document.getElementById('guestStep1').classList.add('hidden');
+    document.getElementById('guestStep2').classList.add('hidden');
+    document.getElementById('staffForm').classList.remove('hidden');
+    setMsg(document.getElementById('auth-msg'), '');
+    document.getElementById('auth-modal').classList.add('open');
+    setTimeout(function(){ var l=document.getElementById('staff-login'); if(l) l.focus(); }, 50);
+  },
+  showGuest: function() {
+    this.mode = 'guest';
+    document.getElementById('guestStep1').classList.remove('hidden');
+    document.getElementById('guestStep2').classList.add('hidden');
+    document.getElementById('staffForm').classList.add('hidden');
+    setMsg(document.getElementById('auth-msg'), '');
+  },
+  closeModal: function() { document.getElementById('auth-modal').classList.remove('open'); document.getElementById('staffForm').classList.add('hidden'); document.getElementById('guestStep1').classList.remove('hidden'); document.getElementById('guestStep2').classList.add('hidden'); },
   resetSteps: function() {
     this.step = 1;
     document.getElementById('guestStep1').classList.remove('hidden');
     document.getElementById('guestStep2').classList.add('hidden');
+    document.getElementById('staffForm').classList.add('hidden');
     setMsg(document.getElementById('auth-msg'), '');
   },
   switchMode: function(mode) {
-    this.mode = mode;
-    var guest = mode === 'guest';
-    document.getElementById('tabGuest').classList.toggle('active', guest);
-    document.getElementById('tabStaff').classList.toggle('active', !guest);
-    document.getElementById('guestStep1').classList.toggle('hidden', !guest);
-    document.getElementById('guestStep2').classList.toggle('hidden', true);
-    document.getElementById('staffForm').classList.toggle('hidden', guest);
-    setMsg(document.getElementById('auth-msg'), '');
+    if (mode === 'staff') { this.openStaffModal(); return; }
+    this.showGuest();
+    this.resetSteps();
   },
   requestCode: function() {
     var email = document.getElementById('auth-email').value.trim();
@@ -2242,7 +2329,7 @@ var auth = {
       document.getElementById('auth-code').focus();
     }.bind(this));
   },
-  backToEmail: function() { this.resetSteps(); },
+  backToEmail: function() { this.showGuest(); this.resetSteps(); },
   verifyCode: function() {
     var code = document.getElementById('auth-code').value.trim();
     var msg = document.getElementById('auth-msg');
@@ -2276,6 +2363,7 @@ var auth = {
       window.location.href = location.protocol === 'file:' ? 'owner.html' : '/owner';
     } else if (role === 'seller') {
       router.navigate('seller');
+      document.body.classList.add('staff-mode');
     } else {
       router.navigate('client');
       client.load();
@@ -2486,6 +2574,10 @@ function loadMap() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  var p = new URLSearchParams(location.search);
+  if (p.get('staff') === '1' || p.get('login') === 'staff' || p.get('barista') === '1') {
+    setTimeout(function(){ if (typeof auth !== 'undefined') auth.openStaffModal(); }, 400);
+  }
   var modal = document.getElementById('auth-modal');
   modal.addEventListener('click', function(e) {
     if (e.target === this) auth.closeModal();
@@ -2525,6 +2617,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }, 60000);
 
   api('/public/events').then(renderEvents);
+
+  // Прямые ссылки для персонала:
+  //   /barista — кабинет баристы (вход по логину/паролю)
+  //   /owner   — кабинет владельца (отдельная страница owner.html)
+  var p2 = location.pathname.replace(/\/$/, '');
+  var staffLink = (p2 === '/barista' || p2 === '/seller' || p2 === '/staff');
+  if (staffLink) {
+    document.body.classList.add('staff-mode');
+    var saved = null;
+    try { saved = JSON.parse(localStorage.getItem(STORE_USER) || 'null'); } catch (e) { saved = null; }
+    if (saved && saved.role === 'seller') {
+      router.navigate('seller');
+    } else {
+      setTimeout(function(){ if (typeof auth !== 'undefined') auth.openStaffModal(); }, 400);
+    }
+  }
 
   if (document.getElementById('page-contacts').classList.contains('active')) loadMap();
 });
